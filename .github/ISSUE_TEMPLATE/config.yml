@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: ❓ Help and Support Slack Channel
-    url: https://tinyurl.com/rethinkdb-slack
-    about: Please ask and answer questions here. 🏥
-  - name: ❓ Help and Support Discord Channel
-    url: https://discord.gg/ZeEq5TE
-    about: Please ask and answer questions here. 🏥
+  - name: 🔖 关注中国DevOps社区官网 
+    url: https://DevOpsChina.org
+    about: 访问社区官网了解“DevOps工具鉴宝”活动详情 🌐
+  - name: 🔖 关注社区微信公众号
+    url: https://mp.weixin.qq.com/s/__h3SpSNMdZ0LzsDEWV83A
+    about: 与社区保持密切联系 🌐
