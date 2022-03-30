@@ -86,3 +86,10 @@
 ## 行为准则
 
 本项目是面向所有社区参与者的共创学习项目，请任何参与者遵守[《中国DevOps社区行为规范》](https://devopschina.org/zh-hans/code-of-conduct)
+
+
+rtmp://live-push.bilivideo.com/live-bvc/
+
+?streamname=live_630300453_61835441&key=77452e490b9d015dd03f4d3478224510&schedule=rtmp&pflag=1
+
+?streamname=live_630300453_61835441&key=77452e490b9d015dd03f4d3478224510&schedule=rtmp&pflag=1
