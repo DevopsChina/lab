@@ -3,6 +3,9 @@ name: 🚀 报名DevOps工具鉴宝分享 💠🪕💎
 title: '[Tools_name] <title>'
 labels: new lab, review needed
 about: 对工具的独到见解和技巧都值得分享给大家 💡🔥🔥🔥
+assignees:
+  - martinliu
+  - majinghe
 ---
 <!--
 说明
