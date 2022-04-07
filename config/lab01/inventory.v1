@@ -1,0 +1,18 @@
+# 应用服务器组
+[app]
+192.168.60.4
+192.168.60.5
+
+# 数据库服务器组
+[db]
+192.168.60.6
+
+# 名为 local 的嵌套组
+[local:children]
+app
+db
+
+# 给嵌套组定义变量，应用于所有服务器
+[local:vars]
+ansible_user=root
+ansible_password='devops1234'

@@ -23,7 +23,12 @@ Ansible 简介 文档：
 * https://www.ansible.com/hubfs//AnsibleFest%20ATL%20Slide%20Decks/Getting%20Started%20with%20Ansible%20-%20Jake.pdf
 * https://aap2.demoredhat.com/decks/ansible_best_practices.pdf
 * https://www.ansible.com/hubfs/Webinar%20PDF%20slides/%5BWIP%5D%20MBU%20_%20ANA%20_%20Webinar%20-%20Ansible%20Network%20Meta%20Collection.pdf
-* 
+  
+Ansible 和其他几种同类工具的对比：
+![](img/1_N2yWueFgHi6M_lQGGsnxVQ.png)
+
+Ansible 最简化架构图：
+![](img/1_BORbGnI7OfdUdsCk7URXKg.png)
 
 ## 1 - 安装 Ansible
 
@@ -69,6 +74,14 @@ Ansible 简介 文档：
   * db ： 
 
 ### 初始化无 SSH 密钥访问
+
+创建 ansible.cfg 配置文件
+
+```yml
+[defaults]
+host_key_checking = false
+```
+
 
 
 
