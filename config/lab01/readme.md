@@ -32,7 +32,7 @@ Ansible 最简化架构图：
 
 ## 1 - 安装 Ansible
 
-### 1.1 用 pip3 在 macOS 上安装
+### 1.1 在 macOS 上安装
 
 操作系统版本 macOS 12.3 (21E230) - Apple M1 Max
 
@@ -45,15 +45,18 @@ Ansible 最简化架构图：
 5. 让配置文件生效，运行 `source ~.zshrc`
 6. 验证 Ansible 安装的版本，运行 `ansible --version`
 
-### 1.2 用 yum 在 CentOS 8 上安装
+### 1.2 在 CentOS 8 上安装
+
+#### 用 yum 安装
 
 步骤如下：
 
 1. 运行命令 `yum install ansible -y`
 2. 验证 Ansible 安装的版本，运行 `ansible --version`
+3. 安装必要的软件包 `yum install sshpass git -y`
 
 
-### 1.3 用 pip3 在 CentOS 8 上安装
+#### 用 pip3 安装
 
 步骤如下：
 
@@ -62,6 +65,7 @@ Ansible 最简化架构图：
 3. 切换到非 root 用户 （如果有的话  ）
 4. 用 `pip3` 安装 Ansible ， 运行 `pip3 install ansible`
 5. 验证 Ansible 安装的版本，运行 `ansible --version`
+6. 安装必要的软件包 `yum install sshpass git -y`
 
 ## 2 - 环境准备
 
@@ -84,6 +88,8 @@ Ansible 最简化架构图：
   * db ： 
 
 ### 初始化无 SSH 密钥访问
+
+先ssh登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令创建 ssh 密钥对，用于无密码访问其它服务器。
 
 首先，尝试使用 有密码的访问。
 
@@ -422,6 +428,12 @@ ansible app -b -a "/opt/myapp/update.sh"
 
 ## 5 - 使用 GitHub Action 自动化执行
 
+
+ToDO：
+
+* Linux ansible 的并发执行3个ip的替换不明显
+* 将 app server / db server 的配置脚本写成 play-book - > role
+* 选择一个 dejong 的应用，用 ansible 部署
 
 
 
