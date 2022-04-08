@@ -53,6 +53,16 @@ Ansible 最简化架构图：
 2. 验证 Ansible 安装的版本，运行 `ansible --version`
 
 
+### 1.3 用 pip3 在 CentOS 8 上安装
+
+步骤如下：
+
+1. 运行命令 `yum install python3-pip -y`
+2. 升级 `pip3` 用  `python3 -m pip install --upgrade pip`
+3. 切换到非 root 用户 （如果有的话  ）
+4. 用 `pip3` 安装 Ansible ， 运行 `pip3 install ansible`
+5. 验证 Ansible 安装的版本，运行 `ansible --version`
+
 ## 2 - 环境准备
 
 ### 环境说明
@@ -82,6 +92,9 @@ Ansible 最简化架构图：
 ```yml
 [defaults]
 host_key_checking = false
+#ansible_connection = paramiko
+inventory  = ./hosts.ini
+command_warnings=False
 ```
 
 创建 inventory.v1 配置文件
@@ -96,13 +109,13 @@ host_key_checking = false
 [db]
 192.168.1.241
 
-# 名为 local 的嵌套组
-[local:children]
+# 名为 localvm 的嵌套组
+[localvm:children]
 app
 db
 
 # 给嵌套组定义变量，应用于所有服务器
-[local:vars]
+[localvm:vars]
 ansible_user=root
 ansible_password='devops1234'
 ```
