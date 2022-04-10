@@ -1,16 +1,17 @@
 ---
 - hosts: localvm
   become: true
+  # 引用变量文件
   vars_files:
     - vars/default.yml
   tasks:
-  # Sudo Group Setup
+  # Sudo 用户组配置
     - name: Make sure we have a 'wheel' group
       group:
         name: wheel
         state: present
 
-    - name: Allow 'wheel' group to have passwordless sudo
+    - name: 允许 'wheel' 组里的用户执行sudo可以不输入用户密码
       lineinfile:
           path: /etc/sudoers
           state: present
@@ -18,7 +19,7 @@
           line: '%wheel ALL=(ALL) NOPASSWD: ALL'
           validate: '/usr/sbin/visudo -cf %s'
 
-  # User + Key Setup
+  # 创建远程命令执行的用户，并配置ssh密钥
     - name: Create a new regular user with sudo privileges
       user:
         name: "{{ create_user }}"

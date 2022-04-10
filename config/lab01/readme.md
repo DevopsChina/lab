@@ -87,7 +87,7 @@ Ansible 最简化架构图：
   * app2 ： 
   * db ： 
 
-### 初始化无 SSH 密钥访问
+### 初始化无 SSH 密钥访问 ｜ Playbook
 
 先ssh登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令创建 ssh 密钥对，用于无密码访问其它服务器。
 
@@ -98,7 +98,6 @@ Ansible 最简化架构图：
 ```yml
 [defaults]
 host_key_checking = false
-#ansible_connection = paramiko
 inventory  = ./hosts.ini
 command_warnings=False
 ```
@@ -230,7 +229,7 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 
 
-## 3 - 用 ad-hoc 命令执行运维工作
+## 3 - 用Ansible命令执行运维工作 ｜ Ad-hoc 
 
 用下面的命令体会 Ansible 的特性和功能。在执行下面的命令之前，复制 inventory.v2 文件为 hosts.ini 文件。
 
@@ -423,7 +422,26 @@ ansible app -b -a "/opt/myapp/update.sh"
 
 
 
-## 4 - 编写 role 配置
+## 4 - 编写和应用 Ansible 模块 ｜ Role / collection
+
+https://www.learnitguide.net/2018/02/ansible-roles-explained-with-examples.html
+
+cd ~/.ansible
+mkdir roles
+ansible-galaxy init my-apache
+vi my-apache/defaults/main.yml
+
+
+[martin@centos8 lab01]$ cat run-my-role.yml
+---
+- hosts: app
+  become: true
+  roles:
+   - my-apache
+
+
+
+
 
 
 ## 5 - 使用 GitHub Action 自动化执行
