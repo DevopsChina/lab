@@ -441,15 +441,31 @@ vi my-apache/defaults/main.yml
 
 
 
+https://www.learnitguide.net/2018/02/ansible-roles-explained-with-examples.html
 
 
+https://www.linuxcnf.com/2020/04/how-to-install-and-configure-apache.html
+https://codingbee.net/ansible/ansible-a-playbook-for-setting-up-an-apache-webserver
+
+https://www.golinuxcloud.com/create-ansible-role-with-example-playbooks/
+https://www.linuxtechi.com/create-use-ansible-roles-in-playbook/
+
+
+/fedora/releases/35/Everything/x86_64/os/repodata/ab3b204e0ad65172b5de99e6077d3ff1379d63b955f98d5043eede346bb9dd3a-primary.xml.zck
+
+
+ http://mirror/repository/fedora/
+ 
+ https://mirrors.tuna.tsinghua.edu.cn/fedora/
+
+
+/fedora/releases/35/Everything/x86_64/os/repodata/ab3b204e0ad65172b5de99e6077d3ff1379d63b955f98d5043eede346bb9dd3a-primary.xml.zck
 
 ## 5 - 使用 GitHub Action 自动化执行
 
 
 ToDO：
 
-* Linux ansible 的并发执行3个ip的替换不明显
 * 将 app server / db server 的配置脚本写成 play-book - > role
 * 选择一个 dejong 的应用，用 ansible 部署
 
