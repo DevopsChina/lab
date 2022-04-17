@@ -2,11 +2,15 @@
 
 ![logo](img/ansible-wide.png)
 
-Ansible 的发音？是什么意思？出处？
+## Ansible 的发音？
 
 ![starwar](img/192-1928992_order-66.jpg)
 
+## Ansible 是什么？
+
 [维基百科](https://en.wikipedia.org/wiki/Ansible_(software))：术语 "ansible "是乌苏拉-K-勒古恩在她1966年的小说《罗卡农的世界》中创造的，它指的是虚构的即时通信系统。是一类虚构的设备或技术，能够进行近乎瞬时或比光速更快的通信。
+
+## 创业小传
 
 关于 Ansible 的小故事：“摸鱼创业成功的经典案例！”，看下 Founder, CEO & Chairman - Ansible 的 LinkedIn 你就懂了。
 
@@ -16,7 +20,9 @@ Ansible 的发音？是什么意思？出处？
 
 ![then push me back in](img/t8redb90cc631.jpg)
 
-Ansible 简介 文档：
+## 参考信息
+
+Ansible 简介文档：
 
 * https://docs.ansible.com/ansible/latest/index.html
 * https://en.wikipedia.org/wiki/Ansible_(software)
@@ -25,10 +31,12 @@ Ansible 简介 文档：
 * https://www.ansible.com/hubfs/Webinar%20PDF%20slides/%5BWIP%5D%20MBU%20_%20ANA%20_%20Webinar%20-%20Ansible%20Network%20Meta%20Collection.pdf
   
 Ansible 和其他几种同类工具的对比：
-![](img/1_N2yWueFgHi6M_lQGGsnxVQ.png)
+
+!工具的对比[](img/1_N2yWueFgHi6M_lQGGsnxVQ.png)
 
 Ansible 最简化架构图：
-![](img/1_BORbGnI7OfdUdsCk7URXKg.png)
+
+![架构图](img/1_BORbGnI7OfdUdsCk7URXKg.png)
 
 ## 1 - 安装 Ansible
 
