@@ -1,0 +1,20 @@
+---
+- name: Prepare localhost for Ansible usage
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - name: Generate SSH key
+      user:
+        name: "{{ ansible_user_id }}"
+        generate_ssh_key: yes
+
+- name: Prepare host(s) for Ansible usage
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Set authorized key on remote
+      authorized_key:
+        user: "martin"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"

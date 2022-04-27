@@ -1,0 +1,36 @@
+---
+- hosts: localvm
+  become: true
+  # 引用变量文件
+  vars_files:
+    - vars/default.yml
+  tasks:
+  # Sudo 用户组配置
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
+
+    - name: 允许 'wheel' 组里的用户执行sudo可以不输入用户密码
+      lineinfile:
+          path: /etc/sudoers
+          state: present
+          regexp: '^%wheel'
+          line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+          validate: '/usr/sbin/visudo -cf %s'
+
+  # 创建远程命令执行的用户，并配置ssh密钥
+    - name: Create a new regular user with sudo privileges
+      user:
+        name: "{{ create_user }}"
+        state: present
+        groups: wheel
+        append: true
+        create_home: true
+        shell: /bin/bash
+
+    - name: Set authorized key for remote user
+      authorized_key:
+        user: "{{ create_user }}"
+        state: present
+        key: "{{ copy_local_key }}"
