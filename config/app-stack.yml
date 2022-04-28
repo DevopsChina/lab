@@ -1,0 +1,51 @@
+---
+- hosts: app
+  become: true
+  # 引用变量文件
+  vars_files:
+    - vars/default.yml
+  tasks:
+    - name: Config NTP Server  # 配置 ntp 服务器
+      yum:
+        name: chrony
+        state: present
+    - name: Start NTP service # 启动 chronyd 服务
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+    - name: Install Python3&pip  # 配置 ntp 服务器
+      yum:
+        name: python3-pip
+        state: present
+    - name: Install django package
+      pip:
+        name: django<4
+        state: present
+
+- hosts: db
+  become: true
+  tasks:
+    - name: Install Mariadb Server
+      yum:
+        name: mariadb-server,python3-PyMySQL
+        state: present
+    - name: Start DB service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: present
+    - name: Start Firewalld service
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+    - name: enable db port
+      firewalld:
+        port: 3306/tcp
+        permanent: yes
+        state: enabled
