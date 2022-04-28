@@ -32,7 +32,7 @@ Ansible 简介文档：
   
 Ansible 和其他几种同类工具的对比：
 
-!工具的对比[](img/1_N2yWueFgHi6M_lQGGsnxVQ.png)
+![工具的对比](img/1_N2yWueFgHi6M_lQGGsnxVQ.png)
 
 Ansible 最简化架构图：
 
