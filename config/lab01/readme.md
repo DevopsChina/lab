@@ -40,6 +40,18 @@ Ansible 最简化架构图：
 
 ## 1 - 安装 Ansible
 
+### 环境说明
+
+控制器 - Contorler ：
+* Fedora 35 ：192.168.31.30
+
+被管理的服务器 - Hosts ：
+
+* 本地虚拟机 - Fedora 35 
+  * app1 ： 192.168.31.165 
+  * app2 ：192.168.31.124
+  * db ：192.168.31.58
+
 ### 1.1 在 macOS 上安装【开发环境】
 
 下面是在操作系统版本 macOS 12.3 (21E230) 上的安装过程，其中第四个步骤需要按实际情况修改。
@@ -57,14 +69,19 @@ Ansible 最简化架构图：
 
 #### 用 dnf 安装
 
+在 Master （controler）上安装部署 Ansble 工具集。
+
 步骤如下：
 
 1. 运行命令 `dnf install ansible -y`
 2. 验证 Ansible 安装的版本，运行 `ansible --version`
 3. 安装必要的软件包 `dnf install sshpass git -y`
 
+这种安装的版本应该是更老一些，没有 pip 安装的版本新。
 
 #### 用 pip3 安装
+
+下面，我们在 Master （controler）上安装部署 Ansble 工具集。
 
 步骤如下：
 
@@ -78,26 +95,14 @@ Ansible 最简化架构图：
 
 ## 2 - 环境准备
 
-### 环境说明
-
-控制器 - Contorler ：
-* Fedora 35 ：192.168.31.30
-
-被管理的服务器 - Hosts ：
-
-* 本地虚拟机 - Fedora 35 
-  * app1 ： 192.168.31.165 
-  * app2 ：192.168.31.124
-  * db ：192.168.31.58
-
 
 ### 初始化无 SSH 密钥访问 
 
-Ansible 是通过 SSH 访问被管理的节点，完成系统、服务配置工作的。
+Ansible 是通过 SSH 访问被管理的节点，完成系统、服务配置工作。
 
 先ssh登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令创建 ssh 密钥对，用于无密码访问其它服务器。
 
-秘钥对的位置：
+查看所创建的测试用秘钥对的位置：
 
 ```sh
 [martin@ctl ~]$ ls ~/.ssh
@@ -119,8 +124,8 @@ Ansible 的执行引擎的行为特性配置文件是是 ansible.cfg 文件，�
 [defaults]
 host_key_checking = false
 inventory  = ./hosts.ini
-command_warnings=False
-deprecation_warnings=False
+command_warnings = False
+deprecation_warnings = False
 roles_path = ./roles
 nocows = 1
 retry_files_enabled = False
@@ -224,6 +229,7 @@ ansible_password='devops1234'
         state: present
         key: "{{ copy_local_key }}"
 ```
+
 这个文件引用了一个变量文件 vars/default.yml ，创建这个目录和文件，它的内容如下：
 
 ```yml
@@ -327,13 +333,15 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 }
 ```
 
-## 3 - 用Ansible命令执行运维工作 ｜ Ad-hoc 
+## 3 - 用 Ansible 命令执行运维工作 ｜ Ad-hoc 
 
-用下面的命令体会 Ansible 的特性和功能。在执行下面的命令之前，复制 inventory.v2 文件为 hosts.ini 文件。
+用下面的命令体会 Ansible 的特性和内置模块的功能。在执行下面的命令之前，复制 inventory.v2 文件为 hosts.ini 文件。这样命令可以更加简洁。
 
 ### 默认并发执行
 
 运行多次下面的命令，了解多线程并发的特性。
+
+使用 -a 参数远程执行命令
 
 ```sh
 ansible localvm -a "hostname"
@@ -361,6 +369,9 @@ ansible localvm -a "date"
 
 使用Ansible 核心模块变更系统。
 
+* yum 和 servce 模块混用
+* 搭配 -a 的命令行执行
+
 ```sh
 ansible localvm -a "date"
 
@@ -377,6 +388,9 @@ ansible localvm -a "date"
 
 配置应用服务器：安装 python3 和 django
 
+* yum 和 pip 模块的混用
+* 辅助 -a 的命令行执行
+
 ```sh
 ansible app -b -m yum -a "name=python3-pip state=present"
 
@@ -387,6 +401,8 @@ ansible app -a "python3 -m django --version"
 ```
 
 #### 编写第一个应用服务器配置 PlayBook
+
+如果以上的工作需要重复执行，就应该将其放到一个 Playbook 中。
 
 创建名为 app-stack.yml 的文件，内容如下：
 
@@ -404,7 +420,7 @@ ansible app -a "python3 -m django --version"
         name: chronyd
         state: started
         enabled: yes
-    - name: Install Python3&pip  # 配置 ntp 服务器
+    - name: Install Python3&pip 
       yum:
         name: python3-pip
         state: present
@@ -443,8 +459,12 @@ ansible app -a "python3 -m django --version"
 
 ```
 
+下面执行 ansible-play app-stack.yml 可以得到相同的结果状态。
 
 ### 配置数据库服务器
+
+* yum、service 和 防火墙模块混用
+
 
 ```sh
 ansible db -b -m yum -a "name=mariadb-server state=present"
@@ -562,6 +582,8 @@ ansible app -b -m service -a "name=firewalld state=reloaded enabled=yes"
 
 ansible app -b -a "sh /opt/hello/run-hello.sh"
 ```
+
+在浏览器中输入应用的访问网址： http://192.168.31.165:8000/hello/
 
 
 在 app-satck.yml 中加入下面的内容
