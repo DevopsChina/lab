@@ -551,70 +551,49 @@ PLAY RECAP *********************************************************************
 部署版本控制的应用
 
 ```sh
-ansible app -b -m git -a "repo=git://example.com/path/to/repo.git \
-dest=/opt/myapp update=yes version=1.2.4"
+ansible localvm -b -m yum -a "name=git state=present"
 
-ansible app -b -a "/opt/myapp/update.sh"
+ansible app -b -m git -a "repo=https://github.com/martinliu/hellodjango.git \
+dest=/opt/hello update=yes"
+
+ansible app -b -m firewalld -a "port=8000/tcp state=enabled permanent=yes"
+
+ansible app -b -m service -a "name=firewalld state=reloaded enabled=yes"
+
+ansible app -b -a "sh /opt/hello/run-hello.sh"
 ```
 
 
+在 app-satck.yml 中加入下面的内容
 
-## 4 - 编写和应用 Ansible 模块 ｜ Role / collection
-
-https://www.learnitguide.net/2018/02/ansible-roles-explained-with-examples.html
-
-cd ~/.ansible
-mkdir roles
-ansible-galaxy init my-apache
-vi my-apache/defaults/main.yml
-
-
-[martin@centos8 lab01]$ cat run-my-role.yml
----
-- hosts: app
-  become: true
-  roles:
-   - my-apache
-
-
-
-https://www.learnitguide.net/2018/02/ansible-roles-explained-with-examples.html
-
-
-https://www.linuxcnf.com/2020/04/how-to-install-and-configure-apache.html
-https://codingbee.net/ansible/ansible-a-playbook-for-setting-up-an-apache-webserver
-
-https://www.golinuxcloud.com/create-ansible-role-with-example-playbooks/
-https://www.linuxtechi.com/create-use-ansible-roles-in-playbook/
-
-
-/fedora/releases/35/Everything/x86_64/os/repodata/ab3b204e0ad65172b5de99e6077d3ff1379d63b955f98d5043eede346bb9dd3a-primary.xml.zck
-
-
- http://mirror/repository/fedora/
- 
- https://mirrors.tuna.tsinghua.edu.cn/fedora/
-
-
-/fedora/releases/35/Everything/x86_64/os/repodata/ab3b204e0ad65172b5de99e6077d3ff1379d63b955f98d5043eede346bb9dd3a-primary.xml.zck
-
-## 5 - 使用 GitHub Action 自动化执行
-
-
-ToDO：
-
-* 将 app server / db server 的配置脚本写成 play-book - > role
-* 选择一个 dejong 的应用，用 ansible 部署
-
-
-
-```sh
-[root@ansible-appserver ~]# cd .pip/
-[root@ansible-appserver .pip]# ls
-pip.conf
-[root@ansible-appserver .pip]# cat pip.conf 
-[global]
-index = http://192.168.1.173/repository/pypi/
-index-url = http://192.168.1.173/repository/pypi/simple
-trusted-host = 192.168.1.173
+```yml
+    - name: Deploy from github
+      git:
+        repo: https://github.com/martinliu/hellodjango.git
+        dest: /opt/hello
+        update: yes
+    - name: enable app 8000 port
+      firewalld:
+        port: 8000/tcp
+        permanent: yes
+        state: enabled
+    - name: Reload Firewalld service
+      service:
+        name: firewalld
+        state: reloaded
+        enabled: yes
+    - name: Start my hello app
+      command: sh /opt/hello/run-hello.sh
 ```
+
+执行最后的应用部署 ansible-playbook app-stack.yml
+
+## 呼唤下一位鉴宝人
+
+建议的分享的 lab：
+
+* Role 的开发
+* CI/CD 工具中执行 Playbook
+* 容器，k8s 相关主题
+* AWX Ansible 相关主题
+* 生产项目中的经验分享 
