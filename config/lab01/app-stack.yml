@@ -14,7 +14,7 @@
         name: chronyd
         state: started
         enabled: yes
-    - name: Install Python3&pip  # 配置 ntp 服务器
+    - name: Install Python3&pip 
       yum:
         name: python3-pip
         state: present
