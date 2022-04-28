@@ -7,7 +7,7 @@
   tasks:
     - name: Config NTP Server  # 配置 ntp 服务器
       yum:
-        name: chrony
+        name: chrony,git
         state: present
     - name: Start NTP service # 启动 chronyd 服务
       service:
@@ -22,6 +22,23 @@
       pip:
         name: django<4
         state: present
+    - name: Deploy from github
+      git:
+        repo: https://github.com/martinliu/hellodjango.git
+        dest: /opt/hello
+        update: yes
+    - name: enable app 8000 port
+      firewalld:
+        port: 8000/tcp
+        permanent: yes
+        state: enabled
+    - name: Reload Firewalld service
+      service:
+        name: firewalld
+        state: reloaded
+        enabled: yes
+    - name: Start my hello app
+      command: sh /opt/hello/run-hello.sh
 
 - hosts: db
   become: true
