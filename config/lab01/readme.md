@@ -40,9 +40,9 @@ Ansible 最简化架构图：
 
 ## 1 - 安装 Ansible
 
-### 1.1 在 macOS 上安装
+### 1.1 在 macOS 上安装【开发环境】
 
-操作系统版本 macOS 12.3 (21E230) - Apple M1 Max
+下面是在操作系统版本 macOS 12.3 (21E230) 上的安装过程，其中第四个步骤需要按实际情况修改。
 
 步骤如下：
 
@@ -53,15 +53,15 @@ Ansible 最简化架构图：
 5. 让配置文件生效，运行 `source ~.zshrc`
 6. 验证 Ansible 安装的版本，运行 `ansible --version`
 
-### 1.2 在 CentOS 8 上安装
+### 1.2 在 Fedora 35 上安装 【生产环境】
 
-#### 用 yum 安装
+#### 用 dnf 安装
 
 步骤如下：
 
-1. 运行命令 `yum install ansible -y`
+1. 运行命令 `dnf install ansible -y`
 2. 验证 Ansible 安装的版本，运行 `ansible --version`
-3. 安装必要的软件包 `yum install sshpass git -y`
+3. 安装必要的软件包 `dnf install sshpass git -y`
 
 
 #### 用 pip3 安装
@@ -71,56 +71,77 @@ Ansible 最简化架构图：
 1. 运行命令 `yum install python3-pip -y`
 2. 升级 `pip3` 用  `python3 -m pip install --upgrade pip`
 3. 切换到非 root 用户 （如果有的话  ）
-4. 用 `pip3` 安装 Ansible ， 运行 `pip3 install ansible`
-5. 验证 Ansible 安装的版本，运行 `ansible --version`
-6. 安装必要的软件包 `yum install sshpass git -y`
+4. 先设置国内的 pypi 安装源 `pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple`
+5. 用 `pip3` 安装 Ansible ， 运行 `pip3 install ansible`
+6. 验证 Ansible 安装的版本，运行 `ansible --version`
+7. 安装必要的软件包 `yum install sshpass git -y`
 
 ## 2 - 环境准备
 
 ### 环境说明
 
 控制器 - Contorler ：
-* macOS ： localhost
-* centOS 8 ：192.168.1.136
+* Fedora 35 ：192.168.31.30
 
 被管理的服务器 - Hosts ：
 
-* 本地虚拟机 - cenotOS 8 
-  * app1 ： 192.168.1.167 
-  * app2 ：192.168.1.239 
-  * db ：192.168.1.241 
+* 本地虚拟机 - Fedora 35 
+  * app1 ： 192.168.31.165 
+  * app2 ：192.168.31.124
+  * db ：192.168.31.58
 
-* Azure 虚拟机 - cenotOS 8 
-  * app1 ： 
-  * app2 ： 
-  * db ： 
 
-### 初始化无 SSH 密钥访问 ｜ Playbook
+### 初始化无 SSH 密钥访问 
+
+Ansible 是通过 SSH 访问被管理的节点，完成系统、服务配置工作的。
 
 先ssh登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令创建 ssh 密钥对，用于无密码访问其它服务器。
 
-首先，尝试使用 有密码的访问。
+秘钥对的位置：
 
-创建 ansible.cfg 配置文件
+```sh
+[martin@ctl ~]$ ls ~/.ssh
+id_rsa  id_rsa.pub
+```
+
+首先，尝试使用密码的访问其它被管理服务器，确认密码正确。
+
+Ansible 的执行引擎的行为特性配置文件是是 ansible.cfg 文件，所在搜索路径的顺序如下：
+
+1. ANSIBLE_CONFIG (环境变量中)
+2. ansible.cfg (当前目录中)
+3. ~/.ansible.cfg (当前用户的 home 目录下)
+4. /etc/ansible/ansible.cfg （操作系统的路径）
+
+在当前目录创建一个内容如下的 ansible.cfg 配置文件
 
 ```yml
 [defaults]
 host_key_checking = false
 inventory  = ./hosts.ini
 command_warnings=False
+deprecation_warnings=False
+roles_path = ./roles
+nocows = 1
+retry_files_enabled = False
+
+[ssh_connection]
+control_path = %(directory)s/%%h-%%p-%%r
+pipelining = True
 ```
 
 创建 inventory.v1 配置文件
 
 ```yml
+# 组织方式：功能、地域、环境
 # 应用服务器组
 [app]
-192.168.1.167
-192.168.1.239
+192.168.31.165 
+192.168.31.124
 
 # 数据库服务器组
 [db]
-192.168.1.241
+192.168.31.58
 
 # 名为 localvm 的嵌套组
 [localvm:children]
@@ -131,95 +152,141 @@ db
 [localvm:vars]
 ansible_user=root
 ansible_password='devops1234'
+
 ```
+
+其他可用的定义方法详见：https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html 
+
 
 执行首个 Ansible 命令 `ansible -i inventory.v1 all -m ping` ，结果如下：
 
 ```sh
-[root@ansible-controller lab01]# ansible -i inventory.v1 all -m ping
-192.168.1.241 | SUCCESS => {
+[martin@ctl live]$ ansible -i inventory.v1 all -m ping
+192.168.31.58 | SUCCESS => {
     "ansible_facts": {
-        "discovered_interpreter_python": "/usr/libexec/platform-python"
+        "discovered_interpreter_python": "/usr/bin/python3"
     },
     "changed": false,
     "ping": "pong"
 }
-192.168.1.239 | SUCCESS => {
+192.168.31.165 | SUCCESS => {
     "ansible_facts": {
-        "discovered_interpreter_python": "/usr/libexec/platform-python"
+        "discovered_interpreter_python": "/usr/bin/python3"
     },
     "changed": false,
     "ping": "pong"
 }
-192.168.1.167 | SUCCESS => {
+192.168.31.124 | SUCCESS => {
     "ansible_facts": {
-        "discovered_interpreter_python": "/usr/libexec/platform-python"
+        "discovered_interpreter_python": "/usr/bin/python3"
     },
     "changed": false,
     "ping": "pong"
 }
 ```
 
-配置文件中携带密码是很危险的，下面使用 Ansible 来解决这个问题，创建第一个 playbook ，新建文件 `init-users.yml` ，执行初始化命令 ：`ansible-playbook -i inventory.v1 init-users.yml` ，结果如下：
+配置文件中携带密码是很危险的，下面使用 Ansible 来解决这个问题，创建第一个 playbook ，新建文件 `init-users.yml` 
+```yml
+---
+- hosts: localvm
+  become: true
+  # 引用变量文件
+  vars_files:
+    - vars/default.yml
+  tasks:
+  # Sudo 用户组配置
+    - name: Make sure we have a 'wheel' group
+      group:
+        name: wheel
+        state: present
 
+    - name: 允许 'wheel' 组里的用户执行sudo可以不输入用户密码
+      lineinfile:
+          path: /etc/sudoers
+          state: present
+          regexp: '^%wheel'
+          line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+          validate: '/usr/sbin/visudo -cf %s'
+
+  # 创建远程命令执行的用户，并配置ssh密钥
+    - name: Create a new regular user with sudo privileges
+      user:
+        name: "{{ create_user }}"
+        state: present
+        groups: wheel
+        append: true
+        create_home: true
+        shell: /bin/bash
+
+    - name: Set authorized key for remote user
+      authorized_key:
+        user: "{{ create_user }}"
+        state: present
+        key: "{{ copy_local_key }}"
+```
+这个文件引用了一个变量文件 vars/default.yml ，创建这个目录和文件，它的内容如下：
+
+```yml
+create_user: sysops
+copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+```
+
+现在执行初始化命令 ：`ansible-playbook -i inventory.v1 init-users.yml` ，结果如下：
 
 ```sh
-[root@ansible-controller lab01]# ansible-playbook -i inventory.v1 init-users.yml
-[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
-ERROR! vars file vars/default.yml was not found
-Could not find file on the Ansible Controller.
-If you are using a module and expect the file to exist on the remote, see the remote_src option
-[root@ansible-controller lab01]# ansible-playbook -i inventory.v1 init-users.yml
-[WARNING]: Invalid characters were found in group names but not replaced, use -vvvv to see details
+[martin@ctl live]$ ansible-playbook -i inventory.v1 init-users.yml
 
-PLAY [local-vm] **************************************************************************************************************************************************************************************************
+PLAY [localvm] *********************************************************************************
 
-TASK [Gathering Facts] *******************************************************************************************************************************************************************************************
-ok: [192.168.1.167]
-ok: [192.168.1.239]
-ok: [192.168.1.241]
+TASK [Gathering Facts] *************************************************************************
+ok: [192.168.31.124]
+ok: [192.168.31.165]
+ok: [192.168.31.58]
 
-TASK [Make sure we have a 'wheel' group] *************************************************************************************************************************************************************************
-ok: [192.168.1.167]
-ok: [192.168.1.241]
-ok: [192.168.1.239]
+TASK [Make sure we have a 'wheel' group] *******************************************************
+ok: [192.168.31.165]
+ok: [192.168.31.58]
+ok: [192.168.31.124]
 
-TASK [Allow 'wheel' group to have passwordless sudo] *************************************************************************************************************************************************************
-changed: [192.168.1.239]
-changed: [192.168.1.167]
-changed: [192.168.1.241]
+TASK [允许 'wheel' 组里的用户执行sudo可以不输入用户密码] ***************************************
+changed: [192.168.31.58]
+changed: [192.168.31.124]
+changed: [192.168.31.165]
 
-TASK [Create a new regular user with sudo privileges] ************************************************************************************************************************************************************
-changed: [192.168.1.167]
-changed: [192.168.1.239]
-changed: [192.168.1.241]
+TASK [Create a new regular user with sudo privileges] ******************************************
+changed: [192.168.31.165]
+changed: [192.168.31.124]
+changed: [192.168.31.58]
 
-TASK [Set authorized key for remote user] ************************************************************************************************************************************************************************
-changed: [192.168.1.167]
-changed: [192.168.1.239]
-changed: [192.168.1.241]
+TASK [Set authorized key for remote user] ******************************************************
+changed: [192.168.31.124]
+changed: [192.168.31.58]
+changed: [192.168.31.165]
 
-PLAY RECAP *******************************************************************************************************************************************************************************************************
-192.168.1.167              : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-192.168.1.239              : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
-192.168.1.241              : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+PLAY RECAP *************************************************************************************
+192.168.31.124             : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+192.168.31.165             : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+192.168.31.58              : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 
-[root@ansible-controller lab01]# ssh sysops@192.168.1.239
+[martin@ctl live]$
 ```
 
-从controler上验证无密码SSH密钥认证的登陆，执行 `ssh sysops@192.168.1.239`；查看对方用户的 .ssh 目录。
+ansible-playbook 命令是解析和执行 ansible 的 Playbook 脚本的命令。
+
+从controler上验证无密码SSH密钥认证的登陆，执行 `ssh sysops@192.168.31.124`；查看对方用户的 .ssh 目录。
 
 在所有host上我们配置好了一个Ansible专用的无sudo密码的普通用户。优化 inventory.v1 文件，删除其中的用户名和密码，创建内容如下的 inventory.v2 文件：
 
 ```yml
+# 组织方式：功能、地域、环境
 # 应用服务器组
 [app]
-192.168.1.167
-192.168.1.239
+192.168.31.165
+192.168.31.124
 
 # 数据库服务器组
 [db]
-192.168.1.241
+192.168.31.58
 
 # 名为 localvm 的嵌套组
 [localvm:children]
@@ -235,13 +302,38 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 最后用首个执行的 Ansible 命令 `ansible -i inventory.v2 all -m ping` 验证所有主机是否可以用SSH正常访问，确认得到全绿的输出结果。
 
-
+```sh
+[martin@ctl live]$ ansible -i inventory.v1 all -m ping
+192.168.31.58 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+192.168.31.124 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+192.168.31.165 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+```
 
 ## 3 - 用Ansible命令执行运维工作 ｜ Ad-hoc 
 
 用下面的命令体会 Ansible 的特性和功能。在执行下面的命令之前，复制 inventory.v2 文件为 hosts.ini 文件。
 
-运行多次下面的命令，了解多线程并发的特性
+### 默认并发执行
+
+运行多次下面的命令，了解多线程并发的特性。
 
 ```sh
 ansible localvm -a "hostname"
@@ -255,6 +347,8 @@ ansible localvm -a "hostname" -f 1
 
 ### 环境状况检查
 
+使用 -a 参数的远操作系统里的原生命令。
+
 ```sh
 ansible localvm -a "df -h"
 
@@ -265,7 +359,11 @@ ansible localvm -a "date"
 
 ### 使用 Ansible 模块做变更
 
+使用Ansible 核心模块变更系统。
+
 ```sh
+ansible localvm -a "date"
+
 ansible localvm -b -m yum -a "name=chrony state=present"
 
 ansible localvm -b -m service -a "name=chronyd state=started enabled=yes"
@@ -288,6 +386,64 @@ ansible app -a "python3 -m django --version"
 
 ```
 
+#### 编写第一个应用服务器配置 PlayBook
+
+创建名为 app-stack.yml 的文件，内容如下：
+
+```yml
+---
+- hosts: app
+  become: true
+  tasks:
+    - name: Config NTP Server  # 配置 ntp 服务器
+      yum:
+        name: chrony
+        state: present
+    - name: Start NTP service # 启动 chronyd 服务
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+    - name: Install Python3&pip  # 配置 ntp 服务器
+      yum:
+        name: python3-pip
+        state: present
+    - name: Install django package
+      pip:
+        name: django<4
+        state: present
+
+- hosts: db
+  become: true
+  tasks:
+    - name: Install Mariadb Server  
+      yum:
+        name: mariadb-server,python3-PyMySQL
+        state: present
+    - name: Start DB service 
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: Install firewalld  
+      yum:
+        name: firewalld
+        state: present
+    - name: Start Firewalld service 
+      service:
+        name: mariafirewallddb
+        state: started
+        enabled: yes
+    - name: enable 3306
+        firewalld:
+          zone: public
+          port: 3306/tcp
+          permanent: true
+          state: enabled
+
+```
+
+
 ### 配置数据库服务器
 
 ```sh
@@ -299,122 +455,95 @@ ansible db -b -m yum -a "name=firewalld state=present"
 
 ansible db -b -m service -a "name=firewalld state=started enabled=yes"
 
-ansible db -b -m firewalld -a "zone=database state=present permanent=yes"
-
-ansible db -b -m firewalld -a "source=192.168.1.0/24 zone=database state=enabled permanent=yes"
-
-ansible db -b -m firewalld -a "port=3306/tcp zone=database state=enabled permanent=yes"
+ansible db -b -m firewalld -a "port=3306/tcp zone=public state=enabled permanent=yes"
 
 ansible db -b -m yum -a "name=python3-PyMySQL state=present"
 
-ansible db -b -m mysql_user -a "name=django host=% password=12345 priv=*.*:ALL state=present"
 ```
 
-### 执行目标匹配
+在 app-stack.yml 中增加如下内容
 
-对服务器组中的某一个执行命令
+```yml
 
-```sh
-ansible app -b -a "service chronyd restart" --limit "192.168.1.167"
+- hosts: db
+  become: true
+  tasks:
+    - name: Install Mariadb Server
+      yum:
+        name: mariadb-server,python3-PyMySQL
+        state: present
+    - name: Start DB service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+    - name: Install firewalld
+      yum:
+        name: firewalld
+        state: present
+    - name: Start Firewalld service
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+    - name: enable db port
+      firewalld:
+        port: 3306/tcp
+        permanent: yes
+        state: enabled
 ```
 
-用星号匹配
+在控制器上执行最终的应用配置 PlayBook
 
 ```sh
-ansible app -b -a "service ntpd restart" --limit "*.4"
-```
+[martin@ctl live]$ ansible-playbook app-stack.yml
 
-用正则表达式匹配
+PLAY [app] *************************************************************************************
 
-```sh
-ansible app -b -a "service ntpd restart" --limit ~".*\.4"
-```
+TASK [Gathering Facts] *************************************************************************
+ok: [192.168.31.124]
+ok: [192.168.31.165]
 
-### 用户和组管理
+TASK [Config NTP Server] ***********************************************************************
+ok: [192.168.31.165]
+ok: [192.168.31.124]
 
-创建用户和组
+TASK [Start NTP service] ***********************************************************************
+ok: [192.168.31.124]
+ok: [192.168.31.165]
 
-```sh
-ansible app -b -m group -a "name=admin state=present"
+TASK [Install Python3&pip] *********************************************************************
+ok: [192.168.31.165]
+ok: [192.168.31.124]
 
-ansible app -b -m user -a "name=johndoe group=admin createhome=yes"
+TASK [Install django package] ******************************************************************
+ok: [192.168.31.124]
+ok: [192.168.31.165]
 
-ansible app -b -m user -a "name=johndoe state=absent remove=yes"
+PLAY [db] **************************************************************************************
 
-```
+TASK [Gathering Facts] *************************************************************************
+ok: [192.168.31.58]
 
-### 管理软件包
+TASK [Install Mariadb Server] ******************************************************************
+ok: [192.168.31.58]
 
-安装软件包：
+TASK [Start DB service] ************************************************************************
+ok: [192.168.31.58]
 
-```sh
-ansible app -b -m package -a "name=git state=present"
-```
+TASK [Install firewalld] ***********************************************************************
+ok: [192.168.31.58]
 
-### 管理文件和目录
+TASK [Start Firewalld service] *****************************************************************
+ok: [192.168.31.58]
 
-查看文件属性
+TASK [enable db port] **************************************************************************
+changed: [192.168.31.58]
 
-```sh
-ansible localvm -m stat -a "path=/etc/environment"
-```
-
-从本地复制文件到服务器
-
-```sh
-ansible localvm -m copy -a "src=/etc/hosts dest=/tmp/hosts"
-```
-
-从服务器上下载文件
-
-```sh
-ansible localvm -b -m fetch -a "src=/etc/hosts dest=/tmp"
-```
-
-创建目录和文件
-
-```sh
-ansible localvm -m file -a "dest=/tmp/test mode=644 state=directory"
-
-ansible localvm -m file -a "src=/src/file dest=/dest/symlink state=link"
-
-```
-
-删除目录和文件
-
-
-```sh
-ansible localvm -m file -a "dest=/tmp/test state=absent"
-```
-
-### 后台作业管理
-
-用异步作业异步的更新服务器
-
-```sh
-ansible localvm -b -B 3600 -P 0 -a "yum -y update"
-
-ansible 192.168.1.241 -b -m async_status -a "jid=169825235950.3572"
-
-```
-
-查看日志的方法
-
-
-```sh
-ansible localvm -b -a "tail /var/log/messages"
-ansible localvm -b -m shell -a "tail /var/log/messages | \
-grep ansible-command | wc -l"
-```
-
-管理 cron 作业
-
-```sh
-ansible localvm -b -m cron -a "name='daily-cron-all-servers' \
-hour=4 job='/path/to/daily-script.sh'"
-
-ansible localvm -b -m cron -a "name='daily-cron-all-servers' \
-state=absent"
+PLAY RECAP *************************************************************************************
+192.168.31.124             : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+192.168.31.165             : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+192.168.31.58              : ok=6    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 ```
 
 ### 应用部署
