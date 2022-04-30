@@ -1,10 +1,10 @@
-# DevOps lab
+# DevOps 鉴宝活动说明
 
 获取对DevOps理念和技术的深刻理解，可以通过实操示例项目的方式。我们用这个项目收集各种有趣有料的学习型项目。
 
-"DevOps实验室“的目标是收集和分享各种深度、技术DevOps工具链的实操练习。
+"DevOps鉴宝活动“的目标是收集和分享各种深度、技术DevOps工具链的实操练习。
 
-包含，但不仅限于一下分类。
+包含，但不仅限于以下分类。
 
 - 软件仓库 | code – 管理软件版本的工具–目前使用最广泛的是Git。
 - 构建工具 | build – 有些软件在打包或使用前需要编译，传统的构建工具包括Make、Ant、Maven和MSBuild。
@@ -20,7 +20,7 @@
 
 ## 学习清单
 
-以下是所有社区 DevOps lab 贡献者分享的实操练习内容，请大家根据需求学习打卡，欢迎提交学习过程的视频分享，分享你对某个lab的知识解读。
+以下是所有社区 DevOps 鉴宝活动贡献者分享的实操练习内容，请大家根据需求学习打卡，欢迎提交学习过程的视频分享，分享你对某个DevOps 工具的知识解读。
 
 ### code
 
@@ -59,7 +59,7 @@
 ```sh
 ├── README.md
 ├── build
-│   └── lab01
+│   └── lab01-ansible
 │       └── readme.md
 ├── ci
 ├── code
@@ -83,13 +83,24 @@
 6. 进入 Lab 的学习和宣传阶段，Lab的提交者或者社区中的其他志愿者，用线上直播的方式演示整个lab的操作过程，或者提交自行录制的lab操作流程视频。
 7. 关闭 issue 
 
+## 鸣谢
+
+第一期：
+
+* Red Hat & 极狐 赞助了直播抽奖礼品
+* JetBrains 赞助鉴宝人礼品
+
+第二期：
+
+
+第三期：
+
+
+第四期：
+
+
+第五期：
+
 ## 行为准则
 
 本项目是面向所有社区参与者的共创学习项目，请任何参与者遵守[《中国DevOps社区行为规范》](https://devopschina.org/zh-hans/code-of-conduct)
-
-
-rtmp://live-push.bilivideo.com/live-bvc/
-
-?streamname=live_630300453_61835441&key=77452e490b9d015dd03f4d3478224510&schedule=rtmp&pflag=1
-
-?streamname=live_630300453_61835441&key=77452e490b9d015dd03f4d3478224510&schedule=rtmp&pflag=1
