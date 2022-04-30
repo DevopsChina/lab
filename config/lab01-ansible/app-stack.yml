@@ -7,14 +7,14 @@
   tasks:
     - name: Config NTP Server  # 配置 ntp 服务器
       yum:
-        name: chrony,git
+        name: chrony
         state: present
     - name: Start NTP service # 启动 chronyd 服务
       service:
         name: chronyd
         state: started
         enabled: yes
-    - name: Install Python3&pip  # 配置 ntp 服务器
+    - name: Install Python3&pip 
       yum:
         name: python3-pip
         state: present
@@ -26,6 +26,7 @@
       git:
         repo: https://github.com/martinliu/hellodjango.git
         dest: /opt/hello
+        version: 2.3.4
         update: yes
     - name: enable app 8000 port
       firewalld:
