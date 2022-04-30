@@ -26,6 +26,7 @@
       git:
         repo: https://github.com/martinliu/hellodjango.git
         dest: /opt/hello
+        version: 2.3.4
         update: yes
     - name: enable app 8000 port
       firewalld:

@@ -38,7 +38,9 @@ Ansible 最简化架构图：
 
 ![架构图](img/1_BORbGnI7OfdUdsCk7URXKg.png)
 
-## 1 - 安装 Ansible
+## 安装 Ansible
+
+本教程所使用的的 Ansible 是 Fedora 35 上用 pip3 安装的
 
 ### 环境说明
 
@@ -52,7 +54,7 @@ Ansible 最简化架构图：
   * app2 ：192.168.31.124
   * db ：192.168.31.58
 
-### 1.1 在 macOS 上安装【开发环境】
+### 在 macOS 上安装【开发环境】
 
 下面是在操作系统版本 macOS 12.3 (21E230) 上的安装过程，其中第四个步骤需要按实际情况修改。
 
@@ -61,11 +63,11 @@ Ansible 最简化架构图：
 1. 先安装 Python3 (步骤省略)
 2. 确认 Python3 的版本：`python3 --version`
 3. 运行  ` pip3 install ansible` 
-4. 在 shell 的环境配置文件(例如：~.zshrc)中加入这一行 `export PATH="$PATH:/Users/martinliu/Library/Python/3.8/bin"`
+4. 在 shell 的环境配置文件加入 Python 的可执行文件路径，例如：我在 ~.zshrc 文件中加入这一行 `export PATH="$PATH:/Users/martinliu/Library/Python/3.8/bin"`，不同的用户名和 Python 版本对应这里的路径不同。
 5. 让配置文件生效，运行 `source ~.zshrc`
 6. 验证 Ansible 安装的版本，运行 `ansible --version`
 
-### 1.2 在 Fedora 35 上安装 【生产环境】
+### 在 Fedora 35 上安装 【生产环境】
 
 #### 用 dnf 安装
 
@@ -83,24 +85,24 @@ Ansible 最简化架构图：
 
 下面，我们在 Master （controler）上安装部署 Ansble 工具集。
 
+为了使用到更新版本的 Ansible，我们还需要升级 python 的版本到 >= 3.8；目前 Fedora 35 的默认自带的Python 版本为 3.10.1。
+
 步骤如下：
 
-1. 运行命令 `yum install python3-pip -y`
+1. 安装必要的软件包，运行命令 `dnf install python3-pip  sshpass git -y`
 2. 升级 `pip3` 用  `python3 -m pip install --upgrade pip`
 3. 切换到非 root 用户 （如果有的话  ）
 4. 先设置国内的 pypi 安装源 `pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple`
 5. 用 `pip3` 安装 Ansible ， 运行 `pip3 install ansible`
 6. 验证 Ansible 安装的版本，运行 `ansible --version`
-7. 安装必要的软件包 `yum install sshpass git -y`
 
-## 2 - 环境准备
+## 配置 Ansble 运行环境
 
+### 初始化控制器 
 
-### 初始化无 SSH 密钥访问 
+Ansible 的控制器（Master）通过 SSH 访问和管理被管理的节点，并完成系统、服务配置工作。
 
-Ansible 是通过 SSH 访问被管理的节点，完成系统、服务配置工作。
-
-先ssh登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令创建 ssh 密钥对，用于无密码访问其它服务器。
+首先，在控制器生成 ssh 访问秘钥对。ssh 登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令创建 ssh 密钥对，用于无密码访问其它被服务器节点。
 
 查看所创建的测试用秘钥对的位置：
 
@@ -109,16 +111,16 @@ Ansible 是通过 SSH 访问被管理的节点，完成系统、服务配置工�
 id_rsa  id_rsa.pub
 ```
 
-首先，尝试使用密码的访问其它被管理服务器，确认密码正确。
+尝试使用密码的访问其它被管理服务器，确认你拥有所有正确的密码。（如果你已经有一个统一的访问秘钥，请忽略此步骤）
 
-Ansible 的执行引擎的行为特性配置文件是是 ansible.cfg 文件，所在搜索路径的顺序如下：
+Ansible 控制器节点的执行引擎的行为特性的配置文件是 ansible.cfg 文件，对此文件路径的搜索顺序如下：
 
 1. ANSIBLE_CONFIG (环境变量中)
-2. ansible.cfg (当前目录中)
+2. ansible.cfg (当前目录中) 。
 3. ~/.ansible.cfg (当前用户的 home 目录下)
-4. /etc/ansible/ansible.cfg （操作系统的路径）
+4. /etc/ansible/ansible.cfg （操作系统的路径）- 本教程中使用的方式
 
-在当前目录创建一个内容如下的 ansible.cfg 配置文件
+在当前用户的 Home 目录中创建一个内容如下的 .ansible.cfg 配置文件 (注意是以句点开头的隐藏文件)
 
 ```yml
 [defaults]
@@ -163,7 +165,7 @@ ansible_password='devops1234'
 其他可用的定义方法详见：https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html 
 
 
-执行首个 Ansible 命令 `ansible -i inventory.v1 all -m ping` ，结果如下：
+执行首个 Ansible 命令 `ansible -i inventory.v1 all -m ping` ，正确完成所有被管理节点密码验证后的结果应该类似如下：
 
 ```sh
 [martin@ctl live]$ ansible -i inventory.v1 all -m ping
@@ -190,7 +192,20 @@ ansible_password='devops1234'
 }
 ```
 
-配置文件中携带密码是很危险的，下面使用 Ansible 来解决这个问题，创建第一个 playbook ，新建文件 `init-users.yml` 
+inventory.v1 配置文件中携带密码是很危险的，下面使用 Ansible 来解决这个问题，被配置好所有被管理节点。
+
+* 创建一个 Ansible 专用的名为 sysops 的用户账号 （不建议使用 root 用户，而是非 root 用户）
+* 将其配置为 sudo 提权限并不需要密码的用户。
+* 将控制器当前用户新创建的秘钥对的公钥配置部署到所有被管理节点的 sysops 的授权用户中。
+
+
+下面通过创建第一个 Playbook 来实现对 3 个被管理节点的统一配置。 创建内容如下的文件 `init-users.yml` 
+
+* 使用的模块有 group, lineinfile, user 和 authorized_key 
+* 混合使用完成远程系统的用户配置
+* 引用了变量文件
+
+
 ```yml
 ---
 - hosts: localvm
@@ -204,8 +219,8 @@ ansible_password='devops1234'
       group:
         name: wheel
         state: present
-
-    - name: 允许 'wheel' 组里的用户执行sudo可以不输入用户密码
+  # 允许 'wheel' 组里的用户执行sudo可以不输入用户密码
+    - name: Set sudo without password
       lineinfile:
           path: /etc/sudoers
           state: present
@@ -333,7 +348,15 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 }
 ```
 
-## 3 - 用 Ansible 命令执行运维工作 ｜ Ad-hoc 
+到此为止，我们完成了 Ansible 运行环境的配置，包括：
+
+* 准备 ssh 登录的秘钥 
+* 配置控制器节点的基础配置文件
+* 初始化三个被管理几点的远程登录用户账号
+* 创建了优化的 Inventory 主机清单文件
+* 使用 ping 模块再次确认所有被管理主机的 ssh 登录
+
+## 用 Ansible 命令执行运维工作 ｜ Ad-hoc 
 
 用下面的命令体会 Ansible 的特性和内置模块的功能。在执行下面的命令之前，复制 inventory.v2 文件为 hosts.ini 文件。这样命令可以更加简洁。
 
@@ -367,7 +390,7 @@ ansible localvm -a "date"
 
 ### 使用 Ansible 模块做变更
 
-使用Ansible 核心模块变更系统。
+使用 Ansible 的核心模块变更系统。
 
 * yum 和 servce 模块混用
 * 搭配 -a 的命令行执行
@@ -384,7 +407,18 @@ ansible localvm -b -a "chronyc tracking"
 ansible localvm -a "date"
 ```
 
-### 配置服务器组和单一服务器
+## 部署目标应用系统
+
+应用系统配置部署流程简介：
+
+* 需要在 App1 和 App2 上配置好 Django 运行环境
+* 需要在 DB 上安装 Mariadb
+* 在所有服务器上启动防火墙服务，并配置好需要开放的端口
+* 在两个 App 服务器上从 GitHub 安装并启动 Django 应用
+
+### 配置 Django 运行环境
+
+开始编写第一个应用系统在一套服务器上的综合配置 Playbook。
 
 配置应用服务器：安装 python3 和 django
 
@@ -400,11 +434,9 @@ ansible app -a "python3 -m django --version"
 
 ```
 
-#### 编写第一个应用服务器配置 PlayBook
+本教程中使用了先用逐条 Ansible 配置指令调试的方式，然后在将其翻译到 Playbook 中的方式，在熟悉了这个开发过程和 Ansible 的常用模块后，我们则可以直接开发 Playbook 了。
 
-如果以上的工作需要重复执行，就应该将其放到一个 Playbook 中。
-
-创建名为 app-stack.yml 的文件，内容如下：
+根据以上的所有 Ansible 指令，创建名为 app-stack.yml 的文件，内容如下：
 
 ```yml
 ---
@@ -428,43 +460,17 @@ ansible app -a "python3 -m django --version"
       pip:
         name: django<4
         state: present
-
-- hosts: db
-  become: true
-  tasks:
-    - name: Install Mariadb Server  
-      yum:
-        name: mariadb-server,python3-PyMySQL
-        state: present
-    - name: Start DB service 
-      service:
-        name: mariadb
-        state: started
-        enabled: yes
-    - name: Install firewalld  
-      yum:
-        name: firewalld
-        state: present
-    - name: Start Firewalld service 
-      service:
-        name: mariafirewallddb
-        state: started
-        enabled: yes
-    - name: enable 3306
-        firewalld:
-          zone: public
-          port: 3306/tcp
-          permanent: true
-          state: enabled
-
 ```
 
 下面执行 ansible-play app-stack.yml 可以得到相同的结果状态。
 
 ### 配置数据库服务器
 
+安装 Mariadb 服务器
+
 * yum、service 和 防火墙模块混用
 
+逐条执行下面的调试命令：
 
 ```sh
 ansible db -b -m yum -a "name=mariadb-server state=present"
@@ -481,7 +487,7 @@ ansible db -b -m yum -a "name=python3-PyMySQL state=present"
 
 ```
 
-在 app-stack.yml 中增加如下内容
+在以上命令的结果都符合预期后，在 app-stack.yml 中增加如下内容
 
 ```yml
 
@@ -513,62 +519,14 @@ ansible db -b -m yum -a "name=python3-PyMySQL state=present"
         state: enabled
 ```
 
-在控制器上执行最终的应用配置 PlayBook
+在控制器上执行更新后的 Playbook，运行命令 ansible-play app-stack.yml ，确保执行结果输出正常。
 
-```sh
-[martin@ctl live]$ ansible-playbook app-stack.yml
+### 部署 Django 应用系统
 
-PLAY [app] *************************************************************************************
+从 GitHub 中部署目标应用代码：
 
-TASK [Gathering Facts] *************************************************************************
-ok: [192.168.31.124]
-ok: [192.168.31.165]
-
-TASK [Config NTP Server] ***********************************************************************
-ok: [192.168.31.165]
-ok: [192.168.31.124]
-
-TASK [Start NTP service] ***********************************************************************
-ok: [192.168.31.124]
-ok: [192.168.31.165]
-
-TASK [Install Python3&pip] *********************************************************************
-ok: [192.168.31.165]
-ok: [192.168.31.124]
-
-TASK [Install django package] ******************************************************************
-ok: [192.168.31.124]
-ok: [192.168.31.165]
-
-PLAY [db] **************************************************************************************
-
-TASK [Gathering Facts] *************************************************************************
-ok: [192.168.31.58]
-
-TASK [Install Mariadb Server] ******************************************************************
-ok: [192.168.31.58]
-
-TASK [Start DB service] ************************************************************************
-ok: [192.168.31.58]
-
-TASK [Install firewalld] ***********************************************************************
-ok: [192.168.31.58]
-
-TASK [Start Firewalld service] *****************************************************************
-ok: [192.168.31.58]
-
-TASK [enable db port] **************************************************************************
-changed: [192.168.31.58]
-
-PLAY RECAP *************************************************************************************
-192.168.31.124             : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-192.168.31.165             : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-192.168.31.58              : ok=6    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-```
-
-### 应用部署
-
-部署版本控制的应用
+* 运用 git ，yum ， serviice 和 firewalld 模块
+* 用命令行方式启动应用
 
 ```sh
 ansible localvm -b -m yum -a "name=git state=present"
@@ -583,7 +541,7 @@ ansible app -b -m service -a "name=firewalld state=reloaded enabled=yes"
 ansible app -b -a "sh /opt/hello/run-hello.sh"
 ```
 
-在浏览器中输入应用的访问网址： http://192.168.31.165:8000/hello/
+在浏览器中输入应用的访问网址： http://192.168.31.165:8000/hello/ ，应该在两个 app 服务器上都可以看到相同的结果。
 
 
 在 app-satck.yml 中加入下面的内容
@@ -608,11 +566,20 @@ ansible app -b -a "sh /opt/hello/run-hello.sh"
       command: sh /opt/hello/run-hello.sh
 ```
 
-执行最后的应用部署 ansible-playbook app-stack.yml
+执行最后的应用部署 ansible-playbook app-stack.yml 确认执行后的结果正常，用浏览器可以正常访问 Django 应用页面。
+
+## 总结
+
+希望大家通过本教程学会：
+
+* Ansible 运行环境的基础配置
+* Ansible 的 ad-hoc 方式用法
+* Ansible 核心中的几个常用模块
+* 逐步编写部署目标应用的 Ansible Playbook 
 
 ## 呼唤下一位鉴宝人
 
-建议的分享的 lab：
+建议分享的内容如下（不限于此）：
 
 * Role 的开发
 * CI/CD 工具中执行 Playbook
