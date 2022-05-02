@@ -6,11 +6,11 @@
 
 ![starwar](img/192-1928992_order-66.jpg)
 
-## Ansible 是什么？
+## Ansible 究竟是何物？
 
 [维基百科](https://en.wikipedia.org/wiki/Ansible_(software))：术语 "ansible "是乌苏拉-K-勒古恩在她1966年的小说《罗卡农的世界》中创造的，它指的是虚构的即时通信系统。是一类虚构的设备或技术，能够进行近乎瞬时或比光速更快的通信。
 
-## 创业小传
+## 创始人小传
 
 关于 Ansible 的小故事：“摸鱼创业成功的经典案例！”，看下 Founder, CEO & Chairman - Ansible 的 LinkedIn 你就懂了。
 
@@ -20,7 +20,7 @@
 
 ![then push me back in](img/t8redb90cc631.jpg)
 
-## 参考信息
+## 推荐学习文档
 
 Ansible 简介文档：
 
@@ -40,32 +40,35 @@ Ansible 最简化架构图：
 
 ## 安装 Ansible
 
-本教程所使用的的 Ansible 是 Fedora 35 上用 pip3 安装的
+本教程所使用的 Ansible 是用 pip 在 Fedora 35 上安装的。
 
 ### 环境说明
 
+推荐使用 4 个虚拟机的学习环境，我们模拟的是上面的架构图中的效果。
+
 控制器 - Contorler ：
-* Fedora 35 ：192.168.31.30
 
-被管理的服务器 - Hosts ：
+* os : Fedora 35 
+* ip ：192.168.31.30
 
-* 本地虚拟机 - Fedora 35 
-  * app1 ： 192.168.31.165 
-  * app2 ：192.168.31.124
-  * db ：192.168.31.58
+被管理服务器 - Hosts 本地 Fedora 35 虚拟机 ：
 
-### 在 macOS 上安装【开发环境】
+* app1 ： 192.168.31.165 
+* app2 ：192.168.31.124
+* db ：192.168.31.58
 
-下面是在操作系统版本 macOS 12.3 (21E230) 上的安装过程，其中第四个步骤需要按实际情况修改。
+以上是最佳的学习环境配置，最低配置是：本地笔记本电脑 + 一个虚拟机所组成的开发环境。如果你需要在本机安装开发环境，下面是在操作系统版本 macOS 12.3 (21E230) 上的安装配置过程，其中第四个步骤需要按实际情况修改路径。
 
 步骤如下：
 
 1. 先安装 Python3 (步骤省略)
 2. 确认 Python3 的版本：`python3 --version`
 3. 运行  ` pip3 install ansible` 
-4. 在 shell 的环境配置文件加入 Python 的可执行文件路径，例如：我在 ~.zshrc 文件中加入这一行 `export PATH="$PATH:/Users/martinliu/Library/Python/3.8/bin"`，不同的用户名和 Python 版本对应这里的路径不同。
-5. 让配置文件生效，运行 `source ~.zshrc`
+4. 在 shell 的环境配置文件加入 Python 的可执行文件路径。例如：使用 zsh 的系统在 ~.zshrc 文件中加入这一行 `export PATH="$PATH:/Users/martinliu/Library/Python/3.8/bin"`，不同的用户名和 Python 版本对应这里的路径不同。
+5. 让配置文件生效，运行 `source ~.zshrc` 
 6. 验证 Ansible 安装的版本，运行 `ansible --version`
+
+如果你使用的是 Windows 操作系统，请使用 Windows 10/11 的版本自带的 Windows Subsystem for Linux 功能，在 Linux 的子系统里完成以上的操作。
 
 ### 在 Fedora 35 上安装 【生产环境】
 
@@ -452,9 +455,9 @@ ansible app -a "python3 -m django --version"
         name: chronyd
         state: started
         enabled: yes
-    - name: Install Python3&pip 
+    - name: Install Python3-pip&git 
       yum:
-        name: python3-pip
+        name: python3-pip,git
         state: present
     - name: Install django package
       pip:
@@ -512,7 +515,7 @@ ansible db -b -m yum -a "name=python3-PyMySQL state=present"
         name: firewalld
         state: started
         enabled: yes
-    - name: enable db port
+    - name: Open the db port
       firewalld:
         port: 3306/tcp
         permanent: yes
@@ -544,7 +547,7 @@ ansible app -b -a "sh /opt/hello/run-hello.sh"
 在浏览器中输入应用的访问网址： http://192.168.31.165:8000/hello/ ，应该在两个 app 服务器上都可以看到相同的结果。
 
 
-在 app-satck.yml 中加入下面的内容
+在 app-satck.yml 中的 App 部署部分加入下面的内容
 
 ```yml
     - name: Deploy from github

@@ -1,9 +1,7 @@
 ---
+# 在所有应用服务器上做配置和部署
 - hosts: app
   become: true
-  # 引用变量文件
-  vars_files:
-    - vars/default.yml
   tasks:
     - name: Config NTP Server  # 配置 ntp 服务器
       yum:
@@ -14,9 +12,9 @@
         name: chronyd
         state: started
         enabled: yes
-    - name: Install Python3&pip 
+    - name: Install Python3-pip&git 
       yum:
-        name: python3-pip
+        name: python3-pip,git
         state: present
     - name: Install django package
       pip:
@@ -26,7 +24,6 @@
       git:
         repo: https://github.com/martinliu/hellodjango.git
         dest: /opt/hello
-        version: 2.3.4
         update: yes
     - name: enable app 8000 port
       firewalld:
@@ -41,6 +38,7 @@
     - name: Start my hello app
       command: sh /opt/hello/run-hello.sh
 
+# 在所有所有服务器上做配置和部署
 - hosts: db
   become: true
   tasks:
@@ -62,7 +60,7 @@
         name: firewalld
         state: started
         enabled: yes
-    - name: enable db port
+    - name: Open the db port
       firewalld:
         port: 3306/tcp
         permanent: yes

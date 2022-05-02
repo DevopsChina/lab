@@ -10,8 +10,8 @@
       group:
         name: wheel
         state: present
-
-    - name: 允许 'wheel' 组里的用户执行sudo可以不输入用户密码
+  # 允许 'wheel' 组里的用户执行sudo可以不输入用户密码
+    - name: Make sudo command without password
       lineinfile:
           path: /etc/sudoers
           state: present
@@ -28,7 +28,7 @@
         append: true
         create_home: true
         shell: /bin/bash
-
+  # 将本地 ssh 公钥注入远程授权访问秘钥文件
     - name: Set authorized key for remote user
       authorized_key:
         user: "{{ create_user }}"
