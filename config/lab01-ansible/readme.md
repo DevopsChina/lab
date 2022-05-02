@@ -1,10 +1,12 @@
 # Ansible 新手入门指南
 
-![logo](img/ansible-wide.png)
+![ansible-wide](https://user-images.githubusercontent.com/582423/166117795-a7c0d761-f9f5-40e0-9d85-7bfb9af404b0.png)
+
 
 ## Ansible 的发音？
 
-![starwar](img/192-1928992_order-66.jpg)
+![Starwar](https://user-images.githubusercontent.com/582423/166117837-19f53d31-98e4-471b-9a31-3c264fcb79b4.jpg)
+
 
 ## Ansible 究竟是何物？
 
@@ -18,7 +20,9 @@
 * https://www.linkedin.com/in/timothy-gerla/
 * https://www.linkedin.com/in/michaeldehaan/
 
-![then push me back in](img/t8redb90cc631.jpg)
+
+![then push me back in](https://user-images.githubusercontent.com/582423/166117869-ae72ad01-5977-4557-a147-496a09389409.jpg)
+
 
 ## 推荐学习文档
 
@@ -32,11 +36,12 @@ Ansible 简介文档：
   
 Ansible 和其他几种同类工具的对比：
 
-![工具的对比](img/1_N2yWueFgHi6M_lQGGsnxVQ.png)
+![工具的对比](https://user-images.githubusercontent.com/582423/166117891-d0d288f6-ada3-467b-ab06-c22992b5bff3.png)
 
 Ansible 最简化架构图：
 
-![架构图](img/1_BORbGnI7OfdUdsCk7URXKg.png)
+![架构图](https://user-images.githubusercontent.com/582423/166117928-55190fb0-0105-4cfb-95ed-027ed54a7539.png)
+
 
 ## 安装 Ansible
 
