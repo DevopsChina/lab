@@ -45,26 +45,29 @@ Ansible 最简化架构图：
 
 ## 安装 Ansible
 
-本教程所使用的 Ansible 是用 pip 在 Fedora 35 上安装的。
+本教程推荐使用 `pip` 在 Fedora 35 上安装 Ansible。
 
 ### 环境说明
 
-推荐使用 4 个虚拟机的学习环境，我们模拟的是上面的架构图中的效果。
+推荐使用 4 个虚拟机的学习环境，本教程模拟的是上面的架构图中的效果。
 
-控制器 - Contorler ：
+控制器 - Contorler 【Master】：
 
 * os : Fedora 35 
 * ip ：192.168.31.30
 
-被管理服务器 - Hosts 本地 Fedora 35 虚拟机 ：
+被管理服务器 - Hosts 【node】
 
+* 本地 Fedora 35 虚拟机 
 * app1 ： 192.168.31.165 
 * app2 ：192.168.31.124
 * db ：192.168.31.58
 
-以上是最佳的学习环境配置，最低配置是：本地笔记本电脑 + 一个虚拟机所组成的开发环境。如果你需要在本机安装开发环境，下面是在操作系统版本 macOS 12.3 (21E230) 上的安装配置过程，其中第四个步骤需要按实际情况修改路径。
+以上是建议的最佳学习环境配置。而最低配置可以是：本地笔记本电脑（Win/macOS） + 一个虚拟机(Linux)所组成的开发环境。
 
-步骤如下：
+在本地安装开发环境：以操作系统版本 macOS 12.3 (21E230) 的安装配置过程为例，其中第四个步骤需要按实际情况修改路径。
+
+步骤：
 
 1. 先安装 Python3 (步骤省略)
 2. 确认 Python3 的版本：`python3 --version`
@@ -77,23 +80,13 @@ Ansible 最简化架构图：
 
 ### 在 Fedora 35 上安装 【生产环境】
 
-#### 用 dnf 安装
+本教程推荐用` pip` 安装 Ansible 的方式。同时下面也提供了用 `dnf` 的安装方法。 
 
-在 Master （controler）上安装部署 Ansble 工具集。
-
-步骤如下：
-
-1. 运行命令 `dnf install ansible -y`
-2. 验证 Ansible 安装的版本，运行 `ansible --version`
-3. 安装必要的软件包 `dnf install sshpass git -y`
-
-这种安装的版本应该是更老一些，没有 pip 安装的版本新。
-
-#### 用 pip3 安装
+#### pip 安装
 
 下面，我们在 Master （controler）上安装部署 Ansble 工具集。
 
-为了使用到更新版本的 Ansible，我们还需要升级 python 的版本到 >= 3.8；目前 Fedora 35 的默认自带的Python 版本为 3.10.1。
+为了安装到 Ansible 的最新版本，还需要先升级 python 的版本到 >= 3.8；目前 Fedora 35 自带的Python 版本为 3.10.1，已经满足了 Ansible 对 Python 的最低版本需求。
 
 步骤如下：
 
@@ -104,31 +97,52 @@ Ansible 最简化架构图：
 5. 用 `pip3` 安装 Ansible ， 运行 `pip3 install ansible`
 6. 验证 Ansible 安装的版本，运行 `ansible --version`
 
+#### dnf 安装 
+
+在控制器 （master）上安装部署 Ansble 工具集。
+
+步骤如下：
+
+1. 运行命令 `dnf install ansible -y`
+2. 验证 Ansible 安装的版本，运行 `ansible --version`
+3. 安装必要的软件包 `dnf install sshpass git -y`
+
+dnf 安装到的版本会稍微老一些，没有 pip 安装的版本新。
+
+而在生产中，往往需要安装特定的某个 Ansible 版本，而非当前的最新版本。
+
 ## 配置 Ansble 运行环境
+
+本教程演示和讲解的是将 4 个空白无任何配置的服务器配置为：单一控制器，三个被管理节点的运行环境。
 
 ### 初始化控制器 
 
+#### 创建 SSH 无密码访问秘钥对
+
 Ansible 的控制器（Master）通过 SSH 访问和管理被管理的节点，并完成系统、服务配置工作。
 
-首先，在控制器生成 ssh 访问秘钥对。ssh 登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令创建 ssh 密钥对，用于无密码访问其它被服务器节点。
+首先，在控制器上生成 ssh 访问的秘钥对。ssh 登陆到控制器，最好切换到非root用户，执行 `ssh-keygen` 命令，如果不需要秘钥文件的密码，则需要输入一系列回车即可；新创建 ssh 的密钥对，用于无密码访问其它三个被服务器节点。
 
-查看所创建的测试用秘钥对的位置：
+创建的测试用秘钥对，查看所在位置：
 
 ```sh
+[martin@ctl ~]$ ssh-keygen
 [martin@ctl ~]$ ls ~/.ssh
 id_rsa  id_rsa.pub
 ```
 
 尝试使用密码的访问其它被管理服务器，确认你拥有所有正确的密码。（如果你已经有一个统一的访问秘钥，请忽略此步骤）
 
-Ansible 控制器节点的执行引擎的行为特性的配置文件是 ansible.cfg 文件，对此文件路径的搜索顺序如下：
+#### 配置 ansible.cfg 基础配置文件
+
+Ansible 控制器节点的执行引擎的行为特性的配置文件是 `ansible.cfg` 文件，对此文件路径的搜索顺序如下：
 
 1. ANSIBLE_CONFIG (环境变量中)
 2. ansible.cfg (当前目录中) 。
 3. ~/.ansible.cfg (当前用户的 home 目录下)
 4. /etc/ansible/ansible.cfg （操作系统的路径）- 本教程中使用的方式
 
-在当前用户的 Home 目录中创建一个内容如下的 .ansible.cfg 配置文件 (注意是以句点开头的隐藏文件)
+在当前用户的` Home `目录中创建一个内容如下的 `.ansible.cfg` 配置文件 (注意是以句点开头的隐藏文件)
 
 ```yml
 [defaults]
@@ -145,7 +159,11 @@ control_path = %(directory)s/%%h-%%p-%%r
 pipelining = True
 ```
 
-创建 inventory.v1 配置文件
+#### 编写主机清单文件 - Inventory
+
+主机清单文件就是所谓的 “Inventory”，它是描述所有被管理节点的数据文件。
+
+创建内容如下的  `inventory.v1` 配置文件
 
 ```yml
 # 组织方式：功能、地域、环境
@@ -173,7 +191,7 @@ ansible_password='devops1234'
 其他可用的定义方法详见：https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html 
 
 
-执行首个 Ansible 命令 `ansible -i inventory.v1 all -m ping` ，正确完成所有被管理节点密码验证后的结果应该类似如下：
+执行首个 Ansible 命令 `ansible -i inventory.v1 all -m ping` ，如果能正常使用 inventory 文件中的用户名和密码登录所有被管理节点的话，改命令的结果应该如下：
 
 ```sh
 [martin@ctl live]$ ansible -i inventory.v1 all -m ping
@@ -200,19 +218,25 @@ ansible_password='devops1234'
 }
 ```
 
-inventory.v1 配置文件中携带密码是很危险的，下面使用 Ansible 来解决这个问题，被配置好所有被管理节点。
+#### 创建 Ansible 专用的用户
 
-* 创建一个 Ansible 专用的名为 sysops 的用户账号 （不建议使用 root 用户，而是非 root 用户）
+在拥有所有节点 root 访问的基础上，在所有被管理节点上进一步配置一个 Ansible 专用的账号。
+
+inventory.v1 配置文件中携带密码是很危险的，下面使用 Ansible 来解决这个问题，并配置好所有的被管理节点。
+
+编写 Playbook 实现下面的工作：
+
+* 创建一个 Ansible 专用的名为 `sysops` 的用户账号 （不建议使用 root 用户，而是非 root 用户）
 * 将其配置为 sudo 提权限并不需要密码的用户。
 * 将控制器当前用户新创建的秘钥对的公钥配置部署到所有被管理节点的 sysops 的授权用户中。
 
 
-下面通过创建第一个 Playbook 来实现对 3 个被管理节点的统一配置。 创建内容如下的文件 `init-users.yml` 
+创建第一个 Playbook `init-users.yml` 。 
 
-* 使用的模块有 group, lineinfile, user 和 authorized_key 
-* 混合使用完成远程系统的用户配置
+* 使用到的Ansible模块有 group, lineinfile, user 和 authorized_key 
 * 引用了变量文件
 
+文件的内容如下：  
 
 ```yml
 ---
@@ -253,14 +277,14 @@ inventory.v1 配置文件中携带密码是很危险的，下面使用 Ansible �
         key: "{{ copy_local_key }}"
 ```
 
-这个文件引用了一个变量文件 vars/default.yml ，创建这个目录和文件，它的内容如下：
+这个文件引用了一个变量文件 `vars/default.yml` ，下面创建这个目录和文件，文件的内容如下：
 
 ```yml
 create_user: sysops
 copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 ```
 
-现在执行初始化命令 ：`ansible-playbook -i inventory.v1 init-users.yml` ，结果如下：
+下一步执行这个 Playbook 完成被管理节点的初始化配置 ：`ansible-playbook -i inventory.v1 init-users.yml` ，结果如下：
 
 ```sh
 [martin@ctl live]$ ansible-playbook -i inventory.v1 init-users.yml
@@ -296,13 +320,11 @@ PLAY RECAP *********************************************************************
 192.168.31.124             : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 192.168.31.165             : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
 192.168.31.58              : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
-
-[martin@ctl live]$
 ```
 
-ansible-playbook 命令是解析和执行 ansible 的 Playbook 脚本的命令。
+`ansible-playbook` 命令是解析和执行 Playbook 脚本文件的命令。我们可以看到 Playbook 是一个 yml 格式的状态声明式定义文件。它描述了被管理节点的操作系统中的各种配置细节。
 
-从controler上验证无密码SSH密钥认证的登陆，执行 `ssh sysops@192.168.31.124`；查看对方用户的 .ssh 目录。
+在控制器上验证无密码SSH密钥认证登陆，选取任何一个被管理节点的 ip 地址，执行 `ssh sysops@192.168.31.124`；登录后查看 .ssh 目录中的内容。
 
 在所有host上我们配置好了一个Ansible专用的无sudo密码的普通用户。优化 inventory.v1 文件，删除其中的用户名和密码，创建内容如下的 inventory.v2 文件：
 
@@ -366,13 +388,13 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 ## 用 Ansible 命令执行运维工作 ｜ Ad-hoc 
 
-用下面的命令体会 Ansible 的特性和内置模块的功能。在执行下面的命令之前，复制 inventory.v2 文件为 hosts.ini 文件。这样命令可以更加简洁。
+用下面的命令体会 Ansible 的特性和内置模块的功能。在执行下面的命令之前，复制 inventory.v2 文件为 hosts.ini 文件【ansible.cnf 参数中已做配置】。这样在执行命令的时候就不需要用参数制定 inventory 文件的位置，因此可以更加简洁。
 
-### 默认并发执行
+### 默认并发执行特性
 
-运行多次下面的命令，了解多线程并发的特性。
+运行多次下面相同的命令，了解 Ansible 的多线程并发特性。
 
-使用 -a 参数远程执行命令
+* 使用 -a 参数远程执行 Linux 原生命令
 
 ```sh
 ansible localvm -a "hostname"
@@ -383,6 +405,8 @@ ansible localvm -a "hostname" -f 1
 ansible localvm -a "hostname" -f 1
 ansible localvm -a "hostname" -f 1
 ```
+
+从以上结果中观察 node 节点的执行顺序。
 
 ### 环境状况检查
 
@@ -402,6 +426,7 @@ ansible localvm -a "date"
 
 * yum 和 servce 模块混用
 * 搭配 -a 的命令行执行
+* 在需要提权的地方，使用 -b 参数
 
 ```sh
 ansible localvm -a "date"
@@ -417,12 +442,14 @@ ansible localvm -a "date"
 
 ## 部署目标应用系统
 
-应用系统配置部署流程简介：
+本教程在 GitHub 上准备了一个简单的 hellodjango 应用程序。
 
-* 需要在 App1 和 App2 上配置好 Django 运行环境
-* 需要在 DB 上安装 Mariadb
+应用系统配置部署所需的流程如下：
+
+* 在 App1 和 App2 上配置好 Django 运行环境
+* 在 DB 上安装 Mariadb
 * 在所有服务器上启动防火墙服务，并配置好需要开放的端口
-* 在两个 App 服务器上从 GitHub 安装并启动 Django 应用
+* 在两个 App 服务器上安装并启动 Django 应用
 
 ### 配置 Django 运行环境
 
@@ -474,7 +501,7 @@ ansible app -a "python3 -m django --version"
 
 ### 配置数据库服务器
 
-安装 Mariadb 服务器
+接着我们执行安装 Mariadb 服务器的操作。
 
 * yum、service 和 防火墙模块混用
 
@@ -494,6 +521,9 @@ ansible db -b -m firewalld -a "port=3306/tcp zone=public state=enabled permanent
 ansible db -b -m yum -a "name=python3-PyMySQL state=present"
 
 ```
+
+firewall-cmd --list-all
+
 
 在以上命令的结果都符合预期后，在 app-stack.yml 中增加如下内容
 
@@ -527,7 +557,7 @@ ansible db -b -m yum -a "name=python3-PyMySQL state=present"
         state: enabled
 ```
 
-在控制器上执行更新后的 Playbook，运行命令 ansible-play app-stack.yml ，确保执行结果输出正常。
+在控制器上执行更新后的 Playbook，运行命令 `ansible-playbook app-stack.yml` ，确保执行结果输出正常。
 
 ### 部署 Django 应用系统
 
@@ -574,7 +604,7 @@ ansible app -b -a "sh /opt/hello/run-hello.sh"
       command: sh /opt/hello/run-hello.sh
 ```
 
-执行最后的应用部署 ansible-playbook app-stack.yml 确认执行后的结果正常，用浏览器可以正常访问 Django 应用页面。
+执行最后的应用部署 `ansible-playbook app-stack.yml` 确认执行后的结果正常，用浏览器可以正常访问 Django 应用页面。
 
 ## 总结
 
