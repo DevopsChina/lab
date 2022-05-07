@@ -90,6 +90,12 @@ Must know DevOps Tools for Developer
 
 ## 鸣谢
 
+### 赞助商福利资源
+
+* Red Hat ：欢迎免费注册[红帽开发者账号](https://developers.redhat.com/)，可以免费获得开发者个人订阅的详情[「点这里」](https://www.redhat.com/wapps/tnc/viewterms/72ce03fd-1564-41f3-9707-a09747625585?extIdCarryOver=true&intcmp=701f2000001OMHaAAO&sc_cid=701f2000001OH7YAAW)；订阅中包含了 16 个物理/虚拟机上 RHEL 操作系统的开发者使用订阅，并且可以访问几乎红帽所有产品的安装包和源代码。
+
+### 赞助商参与
+
 第一期：
 
 * Red Hat & 极狐 赞助了直播抽奖礼品
