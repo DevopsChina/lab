@@ -2,6 +2,7 @@
 
 ![ansible-wide](https://user-images.githubusercontent.com/582423/166117795-a7c0d761-f9f5-40e0-9d85-7bfb9af404b0.png)
 
+<iframe src="//player.bilibili.com/player.html?aid=553870481&bvid=BV1Uv4y1K7u9&cid=714451833&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 
 ## Ansible 的发音？
 
