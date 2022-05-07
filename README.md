@@ -1,4 +1,6 @@
-# DevOps 鉴宝活动说明
+# DevOps 工具鉴宝活动
+
+Must know DevOps Tools for Developer
 
 获取对DevOps理念和技术的深刻理解，可以通过实操示例项目的方式。我们这个项目，用 DevOps 工具考古鉴宝的直播方式，请各路实战大拿给社区贡献了一些列有趣有料的Codelab，并用直播的方式进行生动的讲解。
 
