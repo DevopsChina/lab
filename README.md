@@ -93,6 +93,11 @@ Must know DevOps Tools for Developer
 ### 赞助商福利资源
 
 * Red Hat ：欢迎免费注册[红帽开发者账号](https://developers.redhat.com/)，可以免费获得开发者个人订阅的详情[「点这里」](https://www.redhat.com/wapps/tnc/viewterms/72ce03fd-1564-41f3-9707-a09747625585?extIdCarryOver=true&intcmp=701f2000001OMHaAAO&sc_cid=701f2000001OH7YAAW)；订阅中包含了 16 个物理/虚拟机上 RHEL 操作系统的开发者使用订阅，并且可以访问几乎红帽所有产品的安装包和源代码。
+* 极狐 GitLab ：欢迎注册 👏🏻 🦊
+* Elastic：欢迎[免费注册 Elastic Cloud 超长（30 天）3 试用账号](https://ela.st/community-trial-from-mark)，只需要邮箱，无需输入信用卡号，直接体验当前最新版本的 Elastic Stack 技术栈。
+* JetBrains：欢迎免费注册 JetBrains Cloud 。
+
+
 
 ### 赞助商参与
 
