@@ -26,7 +26,7 @@
 1. 2016 年 4 月，Jenkins 发布了 2.0 版本。
 1. 2017 年 4 月，Jenkins 发布了基于 Java 8 的 2.54 版本。
 1. 2019 年 2 月，Jenkins 发布了基于 Java 8 和 Java 11的 2.164 版本。
-1. 截至目前最新版本 2.347 Weekly 和 Jenkins 2.332.3 LTS
+1. 2022 年 5 月，截至目前最新版本 Jenkins 2.347 Weekly 和 Jenkins 2.332.3 LTS
 
 资料链接：
 * http://cruisecontrol.sourceforge.net/download.html
