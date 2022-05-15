@@ -356,7 +356,7 @@ node {
 
 **特点**
 
-Declarative Pipeline 设计意图是使用户将所需要的 Pipeline 各种维度的参数声明出来，而不是描述出来。相对 Scripted Pipeline 语法简单， 但是 Declarative Pipeline 缺少灵活性，所以 Scripted Pipeline 中使用的部分语法在 Declarative Pipeline 中都不能直接使用，但是可以通过 在 Declarative Pipeline 中使用 `script` Step 来支持。
+Declarative Pipeline 设计意图是使用户将所需要的 Pipeline 以各种维度的参数声明出来，而不是编程的方式描述出来。相对 Scripted Pipeline 语法前者更简单， 但是 Declarative Pipeline 缺少灵活性，所以 Scripted Pipeline 中使用的部分语法在 Declarative Pipeline 中都不能直接使用，但是可以通过在 Declarative Pipeline 中使用 `script` Step 来支持。
 
 Declarative Pipeline 的特点是结构化的声明语句，各模块的从属关系比较固定，类似填写 Jenkins 配置 Job 页面的表单。固定格式的声明语句，还有利于从 BlueOcean 中查看工作流。
 
