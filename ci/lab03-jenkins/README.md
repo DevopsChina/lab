@@ -21,7 +21,7 @@
 1. 大约在 2007 年，Hudson 被称为 Cruise Control 和其他开源构建服务器的更好替代品。
 1. 2008 年 5 月的 JavaOne 大会上，Hudson 获得了开发解决方案类的 Duke's Choice 奖项。
 1. 大约在 2010 年，甲骨文声称拥有 Hudson 的商标的权利，所以在 2011 年 1 月通过社区投票改名为 Jenkins (事件起因是因为 2009 年 6月 Oracle 收购 Sun)。
-1. 2011 年 2 月 2 日，Jenkins 的第一个版本 1.396 版可供公众使用。
+1. 2011 年 2 月，Jenkins 的第一个版本 1.396 版可供公众使用。
 1. 2015 年 5 月，Jenkins 发布了基于 Java 7 的 1.612 版本。
 1. 2016 年 4 月，Jenkins 发布了 2.0 版本。
 1. 2017 年 4 月，Jenkins 发布了基于 Java 8 的 2.54 版本。
@@ -288,7 +288,7 @@ pipeline {
 
 历史回顾：
 
-1. 2014 年 5 月 groovy-cps 库诞生了 0.1 版本。
+1. 2014 年 5 月，groovy-cps 库诞生了 0.1 版本。
 2. 2016 年 4 月，Jenkins 发布了 2.0 版本，对应的 groovy-cps-1.7。
 3. 2016 年 4 月，Jenkins 发布了 2.0 版本。
 4. 2016 年 8 月，Jenkins 的 pipeline-model-definition 插件发布 0.1 版本。
