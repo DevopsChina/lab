@@ -60,7 +60,7 @@
 测试环境服务器信息：
 
 * 本地 Rocky Linux 8 虚拟机，配置 4C16G 40G(sys) 100G(data)
-* IP：192.168.2.99
+* IP：192.168.2.220
 
 ### 2.1 搭建原理
 
@@ -202,7 +202,7 @@ docker-compose logs -f
 
 ![](./images/jenkins-master-logs.png)
 
-2. 打开浏览器访问 http://192.168.2.99:30080 
+2. 打开浏览器访问 http://192.168.2.220:30080 
 
 > 账号：*admin* 密码：*jenkins*
 
@@ -226,8 +226,66 @@ docker-compose logs -f
 
 ### 3.2 自由风格工程 和 Pipeline 工程的对比
 
+1. 自由风格工程特点
+
+配置页面分为 6 个区域，包括：工程信息、源码管理、构建触发器、构建环境、构建步骤和构建后动作。配置界面如下图：
+
+![](./images/freestyle-project-config.png)
+
+2. Pipeline 工程的特点
+
+配置界面分为 4 个区域，包括：工程信息、构建触发器和流水线配置。配置界面如下图：
+
+![](./images/pipeline-project-config.png)
+
+3. 两种风格对比演示
+
+自由风格配置界面
+
+![](./images/freestyle-test-print-ip.png)
+
+采用流水线风格描述
+
+```groovy
+pipeline {
+    agent any
+
+    stages {
+        stage('Hello') {
+            environment {
+                // 目前 credentials 支持 Secret Text/Secret File/Username and password/SSH with Private Key等 4 种类型。
+                SSHKEY = credentials('vm-220') 
+            }
+            steps {
+                echo 'Hello Jenkins'
+
+                // 打印当前 Jenkins Agent 的 IP，在 Jenkins Swarm Agent 容器里面。
+                sh "ip addr"
+                
+                // 打印 192.168.2.220 节点 IP 信息
+                sh "ssh -o StrictHostKeyChecking=no -i ${SSHKEY} ${SSHKEY_USR}@192.168.2.220 'ip addr'"
+               
+            }
+        }
+    }
+}
+
+```
+
+> 注：执行需要创建登录 192.168.2.220 的密钥，并将私钥录入 Jenkins 的 Credentials 中。
+
+相关文档链接：
+* https://www.jenkins.io/doc/pipeline/steps/credentials-binding/
+* https://www.jenkins.io/doc/book/pipeline/syntax/
+
 ### 3.3 Jenkins 2.0 中核心的 Jenkinsfile 两种语法背后的历史和原理
 
-### 3.4 如何用你熟悉的技术栈扩展 Jenkins 的构建能力？
+1. Jenkins 2.0 历史
 
-## 实战练习
+2. Scripted Pipeline 特点和原理
+
+3. Declarative Pipeline 特点和原理
+
+4. Jenkinsfile 几种扩展方式
+
+## 4. 实战练习
