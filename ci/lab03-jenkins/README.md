@@ -35,8 +35,11 @@
 * https://en.wikipedia.org/wiki/Jenkins_(software)
 * https://www.jenkins.io/blog/2012/02/02/happy-birthday-jenkins/
 * https://www.jenkins.io/2.0/
-* https://github.com/cloudbees/groovy-cps/
+* https://www.jenkins.io/blog/2017/04/10/jenkins-has-upgraded-to-java-8/
 * https://www.jenkins.io/download/
+* https://www.jenkins.io/blog/2011/06/16/jenkins-long-term-support-release/
+* https://www.jenkins.io/blog/2012/03/13/why-does-jenkins-have-blue-balls/
+* https://www.jenkins.io/blog/2014/07/08/workflow-plugin-tutorial-writing-a-step-impl/
 
 ### 1.3 相关工具对比
 
@@ -286,28 +289,29 @@ pipeline {
 
 1. 2014 年 5 月 groovy-cps 库诞生了 0.1 版本。
 2. 2016 年 4 月，Jenkins 发布了 2.0 版本，对应的 groovy-cps-1.7。
-3. 2017 年 2 月，Jenkins 的 pipeline-model-definition 插件发布 1.0 版本。
-4. 2017 年 4 月，Jenkins 发布了基于 Java 8 的 2.54 版本。
+1. 2016 年 4 月，Jenkins 发布了 2.0 版本。
+3. 2016 年 8 月，Jenkins 的 pipeline-model-definition 插件发布 0.1 版本。
+4. 2017 年 4 月，Jenkins 发布了基于 Java 8 的 2.54 版本，对应的 pipeline-model-definition-1.1.1。
 
 #### 2. Scripted Pipeline 特点和原理
 
 **特点**
 
-    Scripted Pipeline 支持更多的 Groovy 语言语法，不像 Declarative Pipeline 受那么多的结构化限制。由于可以编写灵活的逻辑，可以认为是高级版的 pipeline。
+Scripted Pipeline 支持更多的 Groovy 语言语法，不像 Declarative Pipeline 受那么多的结构化限制。由于可以编写灵活的逻辑，可以认为是高级版的 pipeline。
 
-    如果打算实现的逻辑比较灵活，比如有判断、分支，或者需要用 Groovy 语言编写复杂的运行步骤，都应该选择使用 Scripted Pipeline。
+如果打算实现的逻辑比较灵活，比如有判断、分支，或者需要用 Groovy 语言编写复杂的运行步骤，都应该选择使用 Scripted Pipeline。
 
 **原理**
 
-    所有的开始都是起源于 KK 的一个叫 groovy-cps 项目。
+所有的开始都是起源于 KK 的一个叫 groovy-cps 项目。
 
-    CPS(Continuation-Passing-Style, 续体传递风格)是一种编程风格：所有的控制块都通过 continuation 来显式传递。在 CPS 风格中，函数不能有返回语句，它的调用者要想获得它的结果，需要显式传递一个回调函数来获取结果并继续执行。而为了保证整个程序执行下去，这个回调函数还会一直嵌套下去。这里的回调函数就是一个 continuation 。
+CPS(Continuation-Passing-Style, 续体传递风格)是一种编程风格：所有的控制块都通过 continuation 来显式传递。在 CPS 风格中，函数不能有返回语句，它的调用者要想获得它的结果，需要显式传递一个回调函数来获取结果并继续执行。而为了保证整个程序执行下去，这个回调函数还会一直嵌套下去。这里的回调函数就是一个 continuation 。
 
-    使用 CPS 来实现 Jenkins Pipeline 的原因是期望在任何时候都可以中断代码的执行保存状态，并在适当时候恢复执行。这可以应对 Jenkins Agent 宕机的场景。如果一个函数执行过后就返回了，那么就会丢失一部分状态，CPS 代码由于在中间不返回结果，因此可以解决这个问题。
+使用 CPS 来实现 Jenkins Pipeline 的原因是期望在任何时候都可以中断代码的执行保存状态，并在适当时候恢复执行。这可以应对 Jenkins Agent 宕机的场景。如果一个函数执行过后就返回了，那么就会丢失一部分状态，CPS 代码由于在中间不返回结果，因此可以解决这个问题。
 
-    然而，编写 Pipeline 代码的 Groovy 语言，其本身并不是 CPS 风格的，这就需要一个解释器将代码编译成 CPS 风格，在 Jenkins 里面通过 workflow-cps-plugin 包装 groovy-cps 这个库来完成。
+然而，编写 Pipeline 代码的 Groovy 语言，其本身并不是 CPS 风格的，这就需要一个解释器将代码编译成 CPS 风格，在 Jenkins 里面通过 workflow-cps-plugin 包装 groovy-cps 这个库来完成。
 
-    在 workflow-cps-plugin 插件中，将 Job 配置的 Jenkinsfile 解析转为为 `CpsScript` 对象，并借助 Groovy 强大的 DSL (领域特定语言) 能力，实现对特点关键的解析。
+在 workflow-cps-plugin 插件中，将 Job 配置的 Jenkinsfile 解析转为为 `CpsScript` 对象，并借助 Groovy 强大的 DSL (领域特定语言) 能力，实现对特点关键的解析。
 
 
 举个栗子：
@@ -337,19 +341,20 @@ node {
 * https://github.com/jenkinsci/workflow-cps-plugin
 * https://github.com/jenkinsci/pipeline-stage-step-plugin
 * https://github.com/cloudogu/jenkinsfiles
+* https://www.jenkins.io/blog/2016/09/06/jenkins-world-speaker-blog-pipeline-model-definition/
 
 
 #### 3. Declarative Pipeline 特点和原理
 
 **特点**
 
-    Declarative Pipeline 设计意图是使用户将所需要的 Pipeline 各种维度的参数声明出来，而不是描述出来。相对 Scripted Pipeline 语法简单， 但是 Declarative Pipeline 缺少灵活性，所以 Scripted Pipeline 中使用的部分语法在 Declarative Pipeline 中都不能直接使用，但是可以通过 在 Declarative Pipeline 中使用 `script` Step 来支持。
+Declarative Pipeline 设计意图是使用户将所需要的 Pipeline 各种维度的参数声明出来，而不是描述出来。相对 Scripted Pipeline 语法简单， 但是 Declarative Pipeline 缺少灵活性，所以 Scripted Pipeline 中使用的部分语法在 Declarative Pipeline 中都不能直接使用，但是可以通过 在 Declarative Pipeline 中使用 `script` Step 来支持。
 
-    Declarative Pipeline 的特点是结构化的声明语句，各模块的从属关系比较固定，类似填写 Jenkins 配置 Job 页面的表单。固定格式的声明语句，还有利于从 BlueOcean 中查看工作流。
+Declarative Pipeline 的特点是结构化的声明语句，各模块的从属关系比较固定，类似填写 Jenkins 配置 Job 页面的表单。固定格式的声明语句，还有利于从 BlueOcean 中查看工作流。
 
 **原理**
 
-    Declarative Pipeline 是在 Scripted Pipeline 基础上开发，通过实现 `pipeline` 块（block）的语法，以此实现配置风格的流水线描述方式。所以在开发 Declarative Pipeline 时可以在 `pipeline` 块之外可以写 Groovy Scripts。
+Declarative Pipeline 是在 Scripted Pipeline 基础上开发，通过实现 `pipeline` 块（block）的语法，以此实现配置风格的流水线描述方式。所以在开发 Declarative Pipeline 时可以在 `pipeline` 块之外可以写 Groovy Scripts。
 
 语法结构
 
