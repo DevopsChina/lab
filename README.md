@@ -99,7 +99,7 @@
 ### 赞助商福利资源
 
 * Red Hat ：欢迎免费注册[红帽开发者账号](https://developers.redhat.com/)，可以免费获得开发者个人订阅的详情[「点这里」](https://www.redhat.com/wapps/tnc/viewterms/72ce03fd-1564-41f3-9707-a09747625585?extIdCarryOver=true&intcmp=701f2000001OMHaAAO&sc_cid=701f2000001OH7YAAW)；订阅中包含了 16 个物理/虚拟机上 RHEL 操作系统的开发者使用订阅，并且可以访问几乎红帽所有产品的安装包和源代码。官方微信公众号「红帽支持与服务」
-* 极狐 GitLab ：欢迎注册 👏🏻 🦊
+* 极狐 GitLab ：欢迎[免费注册使用极狐GitLab SaaS](https://gitlab.cn/)。凡是通过 DevOps 社区鉴宝活动注册的用户，可以发邮件至 marketing@gitlab.cn，申请超长（超 1 个月以上）时间的旗舰版试用（发邮件是为了方便获取需要延长旗舰版试用的 Group 等信息）。
 * Elastic：欢迎[免费注册 Elastic Cloud 超长（30 天）试用账号](https://info.elastic.co/elasticsearch-service-trial-community-showcase.html?ultron=community-martin&hulk=30d)，只需要邮箱，无需输入信用卡号，直接体验当前最新版本的 Elastic Stack 技术栈。官方微信公众号「Elastic搜索」
 * JetBrains TeamCity Cloud 平台焕然一新，CI/CD 本色依旧，[免费试用](https://www.jetbrains.com/zh-cn/teamcity/cloud/)DevOps社区成员亮明身份还可通过链接获取[更长试用时间](https://www.jetbrains.com/zh-cn/teamcity/get-in-touch/) 官方微信号「JetBrainsChina」
 
