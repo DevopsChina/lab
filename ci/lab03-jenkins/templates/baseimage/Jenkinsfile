@@ -1,0 +1,170 @@
+/*
+
+# 功能描述
+
+构建基础镜像
+
+# 参数配置
+
+```yaml
+
+coderepo:
+  auth: xxx
+  url: xxx
+
+dockerpush:
+  auth: xxx
+  registry: xxx
+  namespace: xxx
+  image: xxx
+
+build_method: docker-compose
+```
+
+# 插件依赖
+
+* https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/
+* https://plugins.jenkins.io/docker-workflow/
+* https://github.com/opsbox-dev/oes-template-plugin
+
+
+# 使用方法
+
+*/
+
+def branch = purgeBranchString(coderepo.branch)
+
+pipeline {
+
+  agent any
+
+  options {    
+      disableConcurrentBuilds()
+      skipDefaultCheckout true
+  }
+
+  stages {
+    
+    stage("Checkout Code") {
+        steps {
+            script {
+                deleteDir()
+                def gitParams = [
+                        $class                           : 'GitSCM',
+                        branches                         : [[name: "${branch}"]],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions                       : [[$class: 'CleanBeforeCheckout']],
+                        submoduleCfg                     : [],
+                        userRemoteConfigs                : [[url: "${coderepo.url}"]]
+                ]
+                if (coderepo.auth != null) {
+                    gitParams.userRemoteConfigs = [[credentialsId: "${coderepo.auth}",
+                                                    url          : "${coderepo.url}"]]
+                }
+                checkout(gitParams)
+            }
+        }
+    } // end: Checkout Code
+
+    stage("Build Image by Docker Compose") {
+      when {
+        expression { build_method == "docker-compose" }
+      }
+      steps {
+        script {
+          // 检查关键文件是否存在
+          if (!fileExists('docker-compose.yml')) {
+            error( "--//ERR: 缺少docker-compose.yml文件")
+          }
+
+          def _docker_compose_j2 = """
+            |{% set version = "${branch}" %}
+            |version: '3'
+            |services:
+            |{%- for name, _ in services.items() %}
+            |  {{ name }}:
+            |    {% if version == "main" %}
+            |    image: "${dockerpush.registry}/${dockerpush.namespace}/${dockerpush.image}:{{name}}"
+            |    {% else %}
+            |    image: "${dockerpush.registry}/${dockerpush.namespace}/${dockerpush.image}:{{name}}-{{ version }}"
+            |    {% endif %}
+            |{%- endfor %}
+            """.stripMargin().stripIndent()
+          writeFile(file: 'docker-compose.j2', text: _docker_compose_j2)
+
+          def _dockerfile = '''
+            FROM rockylinux:8
+            RUN yum install -y python3 && pip3 install jinja2-cli[yaml]
+            '''.stripIndent()
+          writeFile(file: 'Dockerfile', text: _dockerfile)
+
+          def jinja2Image = docker.build("rockylinux8:jinja2")
+          jinja2Image.inside {
+              sh """
+              set -eux
+              jinja2 ./docker-compose.j2 ./docker-compose.yml > docker-compose.override.yml
+              """
+          }
+
+          docker.withRegistry("https://${dockerpush.registry}", "${dockerpush.auth}") {
+            sh """
+              set -eux
+              docker-compose -f docker-compose.yml -f docker-compose.override.yml build
+              docker-compose -f docker-compose.yml -f docker-compose.override.yml push
+              """
+          }
+        }
+      }
+    } // end: Build Image by Docker Compose
+
+    stage("Build Image by Docker") {
+      when {
+        expression { build_method == "docker" }
+      }
+      steps {
+        script {
+          if (!fileExists('Dockerfile')) {
+            error( "--//ERR: 缺少 Dockerfile 文件")
+          }
+          docker.withRegistry("https://${dockerpush.registry}", "${dockerpush.auth}") {
+            def _tag = branch
+            if (branch == "master") {
+              _tag = "latest"
+            }
+            def _image = docker.build("${dockerpush.registry}/${dockerpush.namespace}/${dockerpush.image}:${_tag}")
+            _image.push()
+          }
+        }
+      }
+    } // end: Build Image by Docker
+
+  }
+}
+
+// looks for string [ci skip] in commit message
+boolean getCiSkip() {
+    sh(returnStdout: true, script: 'git show --pretty=%s%b -s',
+            label : 'check skip CI?'
+    ).toLowerCase().contains('[ci skip]')
+}
+
+String getGitCommit() {
+    sh(
+            returnStdout: true, script: 'git rev-parse HEAD',
+            label : 'getting GIT commit'
+    ).trim()
+}
+
+def purgeBranchString(branch) {
+    def gitBranch = branch
+    if (gitBranch?.startsWith("refs/heads/")) {
+        gitBranch = gitBranch.replace("refs/heads/", "")
+        if (gitBranch != "main") {
+          error("--//INFO: 不支持除 main 之外的分支")
+        }
+    }
+    if (gitBranch?.startsWith("refs/tags/")) {
+        gitBranch = gitBranch.replace("refs/tags/", "")
+    }
+    return gitBranch
+}

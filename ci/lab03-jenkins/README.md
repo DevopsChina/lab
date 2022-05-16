@@ -39,7 +39,6 @@
 * https://www.jenkins.io/download/
 * https://www.jenkins.io/blog/2011/06/16/jenkins-long-term-support-release/
 * https://www.jenkins.io/blog/2012/03/13/why-does-jenkins-have-blue-balls/
-* https://www.jenkins.io/blog/2014/07/08/workflow-plugin-tutorial-writing-a-step-impl/
 * https://www.jenkins.io/blog/2017/01/17/Jenkins-is-upgrading-to-Java-8/
 
 ### 1.3 相关工具对比
@@ -290,7 +289,6 @@ pipeline {
 
 1. 2014 年 5 月，groovy-cps 库诞生了 0.1 版本。
 2. 2016 年 4 月，Jenkins 发布了 2.0 版本，对应的 groovy-cps-1.7。
-3. 2016 年 4 月，Jenkins 发布了 2.0 版本。
 4. 2016 年 8 月，Jenkins 的 pipeline-model-definition 插件发布 0.1 版本。
 5. 2017 年 2 月，Jenkins 的 pipeline-model-definition 插件发布 1.0 GA 版本。
 6. 2017 年 4 月，Blue Ocean 1.0
@@ -350,6 +348,7 @@ node {
 * https://www.jenkins.io/blog/2017/02/15/declarative-notifications/
 * https://www.jenkins.io/blog/2017/04/05/say-hello-blueocean-1-0/
 * https://www.jenkins.io/blog/2017/04/10/jenkins-has-upgraded-to-java-8/
+* https://www.jenkins.io/blog/2014/07/08/workflow-plugin-tutorial-writing-a-step-impl/
 
 
 #### 3. Declarative Pipeline 特点和原理

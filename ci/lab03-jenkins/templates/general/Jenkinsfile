@@ -1,0 +1,146 @@
+/*
+
+# 功能描述
+
+构建基础镜像
+
+# 参数配置
+
+```yaml
+
+coderepo:
+  auth: xxx
+  url: xxx
+  branch: mkt4d
+
+registry:
+  url: xxx
+  auth: xxx
+
+pipeline:
+  build:
+    script: |
+      # 配置环境变量
+      # 使用 dapper 编译代码
+      dapper -m bind
+
+  archive:
+    script: |
+      # 打包镜像
+      docker build -t $DOCKER_REG/xxx/xxx:version . -f Dockerfile
+      docker push $DOCKER_REG/xxx/xxx:version
+
+  deploy:
+    image: xxx/xxx
+    kubeconfig: xxx # credential id.
+    script: |
+      kubectl set image <app> <app>=$DOCKER_REG/xxx/xxx:version -n <group>
+      kubectl rollout status --timeout=300 <app> -n <group>
+     
+```
+
+# 插件依赖
+
+* https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/
+* https://plugins.jenkins.io/docker-workflow/
+* https://www.jenkins.io/doc/book/pipeline/docker/
+* https://docs.cloudbees.com/docs/admin-resources/latest/plugins/docker-workflow
+* https://github.com/opsbox-dev/oes-template-plugin
+
+
+# 使用方法
+
+演示样例代码：https://jihulab.com/oes-workspace/spring-demo
+*/
+
+def branch = purgeBranchString(coderepo.branch)
+
+pipeline {
+
+  agent any
+
+  options {    
+      disableConcurrentBuilds()
+      skipDefaultCheckout true
+  }
+
+  stages {
+    
+    stage("Checkout Code") {
+        steps {
+            script {
+                deleteDir()
+                def gitParams = [
+                        $class                           : 'GitSCM',
+                        branches                         : [[name: "${branch}"]],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions                       : [[$class: 'CleanBeforeCheckout']],
+                        submoduleCfg                     : [],
+                        userRemoteConfigs                : [[url: "${coderepo.url}"]]
+                ]
+                if (coderepo.auth != null) {
+                    gitParams.userRemoteConfigs = [[credentialsId: "${coderepo.auth}",
+                                                    url          : "${coderepo.url}"]]
+                }
+                checkout(gitParams)
+            }
+        }
+    } // end: Checkout Code
+
+    stage("build") {
+        steps {
+            script {
+                docker.withRegistry("https://${registry.url}", "${registry.auth}") {
+                    sh """
+                        ${pipeline.build.script}
+                    """.stripIndent()
+                }
+            }
+        }
+    }
+
+    stage("archive") {
+        steps {
+            script {
+                docker.withRegistry("https://${registry.url}", "${registry.auth}") {
+                    sh """
+                        export DOCKER_REG=${registry.url}
+                        ${pipeline.build.script}
+                    """.stripIndent()
+                }
+            }
+        }
+    }
+
+    stage("deploy") {
+        environment {
+            KUBECONFIG = credentials("${pipeline.deploy.kubeconfig}")
+        }
+        steps {
+            script {
+                docker.withRegistry("https://${registry.url}", "${registry.auth}") {
+                    docker.image("${pipeline.deploy.image}").inside("-e KUBECONFIG=/root/.kube/config -v ${KUBECONFIG}:/root/.kube/config") {
+                        sh """
+                            ${pipeline.deploy.script}
+                        """.stripIndent()
+                    }
+                }
+            }
+        }
+    } // end deploy stage.
+  }
+}
+
+def purgeBranchString(branch) {
+    def gitBranch = branch
+    if (gitBranch?.startsWith("refs/heads/")) {
+        gitBranch = gitBranch.replace("refs/heads/", "")
+        if (gitBranch != "main") {
+          error("--//INFO: 不支持除 main 之外的分支")
+        }
+    }
+    if (gitBranch?.startsWith("refs/tags/")) {
+        gitBranch = gitBranch.replace("refs/tags/", "")
+    }
+    return gitBranch
+}
