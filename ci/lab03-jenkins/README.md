@@ -492,5 +492,7 @@ def purgeBranchString(branch) {
 * https://github.com/opsbox-dev/oes-pipeline-plugin
 
 ## 4. 实战练习
-
+ 
+ >两三句话的简介？
+ 
 * https://github.com/seanly/cloudogu-jenkinsfiles
