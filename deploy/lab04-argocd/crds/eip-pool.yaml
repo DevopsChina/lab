@@ -1,0 +1,11 @@
+# ref: https://openelb.github.io/docs/getting-started/configuration/configure-ip-address-pools-using-eip/
+# 集群中所有节点的网卡名必须一致
+apiVersion: network.kubesphere.io/v1alpha2
+kind: Eip
+metadata:
+  name: eip-pool
+spec:
+  address: 10.10.14.91-10.10.14.92
+  protocol: layer2
+  interface: ens192
+  disable: false

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: list-git
+  namespace: argocd
+spec:
+  generators:
+    - matrix:
+        generators:
+          - clusters: {}
+          - list:
+              elements:
+                - color: red
+                  size: middle
+                - color: green
+                  size: large
+  template:
+    metadata:
+      name: "{{name}}-{{color}}-guestbook"
+      namespace: guestbook
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: HEAD
+        path: kustomize-guestbook
+      destination:
+        server: "{{server}}"
+        namespace: "{{color}}-{{size}}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+      info:
+        - name: "color"
+          value: "{{color}}"
+        - name: "size"
+          value: "{{size}}"

@@ -1,0 +1,35 @@
+# kk create config -f config-monday.yaml
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Cluster
+metadata:
+  name: monday
+spec:
+  hosts:
+    - {
+        name: tm-opsinit-01,
+        address: 10.10.14.99,
+        internalAddress: 10.10.14.99,
+      }
+  roleGroups:
+    etcd:
+      - tm-opsinit-01
+    master:
+      - tm-opsinit-01
+    worker:
+      - tm-opsinit-01
+  controlPlaneEndpoint:
+    domain: monday-api.automan.fun
+    address: ""
+    port: 6443
+  kubernetes:
+    version: v1.19.8
+    imageRepo: kubesphere
+    clusterName: cluster.local
+  network:
+    plugin: calico
+    kubePodsCIDR: 10.233.64.0/18
+    kubeServiceCIDR: 10.233.0.0/18
+  registry:
+    registryMirrors: []
+    insecureRegistries: []
+  addons: []
