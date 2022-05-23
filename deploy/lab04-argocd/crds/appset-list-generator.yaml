@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: monday
+            url: https://kubernetes.default.svc
+          - cluster: tuesday
+            url: https://tuesday-api.automan.fun:6443
+  template:
+    metadata:
+      name: "{{cluster}}-guestbook"
+      namespace: guestbook
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: HEAD
+        path: kustomize-guestbook
+      destination:
+        server: "{{url}}"
+        namespace: guestbook
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

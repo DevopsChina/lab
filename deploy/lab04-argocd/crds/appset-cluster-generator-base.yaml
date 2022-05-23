@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook-cluster
+  namespace: argocd
+spec:
+  generators:
+    - clusters: {} # Automatically use all clusters defined within Argo CD
+  template:
+    metadata:
+      name: "{{name}}-guestbook"
+      namespace: guestbook
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: HEAD
+        path: kustomize-guestbook
+      destination:
+        server: "{{server}}"
+        namespace: guestbook
+      syncPolicy:
+        automated: {}
+        syncOptions:
+          - CreateNamespace=true

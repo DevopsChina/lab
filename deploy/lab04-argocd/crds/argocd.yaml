@@ -1,0 +1,6 @@
+# ref: https://operatorhub.io/operator/argocd-operator
+apiVersion: argoproj.io/v1alpha1
+kind: ArgoCD
+metadata:
+  name: monday-argocd
+spec: {}
