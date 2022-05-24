@@ -102,6 +102,7 @@
 * 极狐 GitLab ：欢迎[免费注册使用极狐GitLab SaaS](https://gitlab.cn/)。凡是通过 DevOps 社区鉴宝活动注册的用户，可以发邮件至 marketing@gitlab.cn，申请超长（超 1 个月以上）时间的旗舰版试用（发邮件是为了方便获取需要延长旗舰版试用的 Group 等信息）。
 * Elastic：欢迎[免费注册 Elastic Cloud 超长（30 天）试用账号](https://info.elastic.co/elasticsearch-service-trial-community-showcase.html?ultron=community-martin&hulk=30d)，只需要邮箱，无需输入信用卡号，直接体验当前最新版本的 Elastic Stack 技术栈。官方微信公众号「Elastic搜索」
 * JetBrains TeamCity Cloud 平台焕然一新，CI/CD 本色依旧，[免费试用](https://www.jetbrains.com/zh-cn/teamcity/cloud/)DevOps社区成员亮明身份还可通过链接获取[更长试用时间](https://www.jetbrains.com/zh-cn/teamcity/get-in-touch/) 官方微信号「JetBrainsChina」
+* 阿里云云起实验室：由阿里云提供的面向个人和企业开发者的零门槛云上实践平台，让开发者能够在“做中学”。实验室提供详细的实验手册指导和免费的实验云资源，一键生成预置实验环境，让开发者能够快速体验云计算、大数据、人工智能等云服务实验场景和解决方案，帮助开发者快速提升使用云服务的能力。[免费体验](https://developer.aliyun.com/adc/?utm_content=g_1000342863)
 
 
 
@@ -119,6 +120,8 @@
 
 第三期：
 
+* 阿里云云起实验室 & Elastc 赞助了直播抽奖礼品
+* JetBrains 赞助鉴宝人礼品
 
 第四期：
 
