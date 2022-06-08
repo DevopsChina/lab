@@ -49,6 +49,8 @@ kubectl create -f https://operatorhub.io/install/argocd-operator.yaml
 kubectl get csv -n operators
 ```
 
+> !!! 注: 如果不配置环境变量，则 ArgoCD 无法创建 Namespace
+
 > ref: https://github.com/argoproj/argo-cd/issues/5886
 
 默认使用 Operator 部署的 ArgoCD，没有集群资源的控制权限；找到 `Subscription` 类型的资源，给 Operator 添加环境变量配置；
@@ -92,6 +94,8 @@ spec:
 
 ArgoCD Operator 默认 Ingress 域名为资源名，此处即为 `monday-argocd`。Operator 官方文档中说可以 `overwrite` 域名，但翻遍了 CRD 的描述信息，也没找到。翻源码才发现 Operator 并没有控制 `host` 字段。直接 `kubectl edit` 即可 @\_@
 
+> !!! 注：官方文档言辞模糊，竟然可以直接修改
+
 > ingress 域名: argo.monday.fun
 
 本地主机配置 hosts 如下:
@@ -119,7 +123,7 @@ kubectl -n argocd get secret monday-argocd-cluster -o jsonpath='{.data.admin\.pa
 
 > ref: https://github.com/argoproj/argocd-example-apps.git
 
-通过 UI 界面或者直接 `kubectl apply` 下方配置清单，创建 ArgoCD 应用清单。
+可以通过 UI 界面或者直接 `kubectl apply` 下方配置清单，创建 ArgoCD 应用清单。
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -146,11 +150,19 @@ spec:
 
 > 常见问题: Namespace "guestbook" for Service "guestbook-helm-guestbook" is not managed
 
+> !!! 注: 这个问题就是 3.1 步骤中没有添加环境导致的
+
 ```shell
 # 通过给 Namespace 打标签的方式，给 ArgoCD 授权
 # 默认情况下 $NAMESPACE=argocd
 kubectl label ns guestbook argocd.argoproj.io/managed-by=$NAMESPACE
 ```
+
+上述配置清单也可以通过 UI 界面生成，具体操作见下图:
+
+![](./images/argocd-ui-create-app.png)
+![](./images/guest-book-app-1.png)
+![](./images/guest-book-app-2.png)
 
 # 5. app-of-apps 模式
 
@@ -225,10 +237,10 @@ CURRENT   NAME                               CLUSTER           AUTHINFO         
           kubernetes-admin@cluster.tuesday   cluster.tuesday   kubernetes-admin
 
 # 导出 argocd-server 443 服务
-kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl port-forward svc/monday-argocd-server -n argocd 9999:443
 
 # 登录 argocd，输入 admin 账号密码
-argocd login 127.0.0.1:8080
+argocd login 127.0.0.1:9999
 
 # 通过 kubeconfig 添加集群
 argocd cluster add kubernetes-admin@cluster.tuesday
