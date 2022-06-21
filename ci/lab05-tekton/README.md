@@ -63,9 +63,27 @@ Tekton 包含了多个组件：
 * [Tekton Hub](https://github.com/tektoncd/hub/blob/main/README.md)
 * [Tekton Operator](https://github.com/tektoncd/operator/blob/main/README.md)
 
-## Demo
+## 演示
+
+既然 Tekton 是 Kubernetes 原生的框架，在正式开始之前需要创建一个 Kubernetes 集群。
+
+在这个集群上我们会安装 Tekton，为了简化架构，在 CD 阶段会将应用也部署这个集群上（实际场景下，CI/CD 的集群基本不会与应用共享集群。当然，共享也没有问题）。
+
+这个演示中我们会实现一个简单的 CI/CD 的流水线：完成一个 [Java 项目](https://github.com/addozhang/tekton-demo)从代码到部署的整个流程。
+
+这个 Java 项目是个 web 服务，有一个 `/hi` 端点，返回 `hello world`。演示的重点是流水线的实现，所以选用了最简单的项目。
+
+### 环境介绍
+
+* k3s v1.21.13+k3s1
+* 2c8g 虚拟机 Ubuntu 20.04
+* 本地 macOS
 
 ### 安装集群
+
+我们使用 k3s 作为 Kubernetes 集群，通过下面的命令可以初始化单节点的集群。
+
+这里我使用的是 2c8g 的 vm 作为节点，既是控制节点也是计算节点。
 
 ```shell
 export INSTALL_K3S_VERSION=v1.21.13+k3s1
@@ -74,12 +92,14 @@ curl -sfL https://get.k3s.io | sh -s - --disable traefik --write-kubeconfig-mode
 
 ### 安装 Tekton Pipeline
 
+最新版本是 v0.36，从 v0.33.x 开始要求 Kubernetes 的版本至少是 1.21。
+
 ```shell
 kubectl apply --filename \
 https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
 ```
 
-检查 CRD
+检查相关的 CRD。
 
 ```shell
 kubectl api-resources --api-group=tekton.dev
@@ -101,6 +121,15 @@ kubectl get po -n tekton-pipelines
 NAME                                           READY   STATUS    RESTARTS   AGE
 tekton-pipelines-controller-5cfb9b8cfc-q4crs   1/1     Running   0          24s
 tekton-pipelines-webhook-6c9d4d5798-7xg8n      1/1     Running   0          24s
+```
+
+### 安装 Tekton Dashboard
+
+通过 Dashboard 我们可以实时查看 `PipelineRun` 和 `TaskRun` 的状态，以及运行的日志；还可以查看定义的各种 CR。
+
+```shell
+kubectl apply --filename \
+https://storage.googleapis.com/tekton-releases/dashboard/latest/tekton-dashboard-release.yaml
 ```
 
 ### Hello, Tekton
@@ -137,17 +166,11 @@ spec:
 EOF
 ```
 
-### CI/CD 流程
-
-有向无环图（DaG）
-
-![](media/16553875121264.jpg)
-
-![CI:CD流程](media/CI:CD%E6%B5%81%E7%A8%8B.png)
+### Demo
 
 我们使用Spring Initializer生成的项目为例, 演示如何使用 Tekton 实现 CICD.
 
-开始之前简单整理下这个项目的 CICD 流程:
+开始之前简单整理下这个项目的 CICD 流程：
 
 1. 拉取代码
 2. maven 打包
@@ -214,7 +237,7 @@ spec:
   volumes:
     - name: m2
       hostPath:
-        path: /data/.m2        
+        path: /data/.m2
 ```
 
 #### 0x04 构建并推送镜像
@@ -257,6 +280,10 @@ spec:
 
 #### 0x05 部署
 
+在部署阶段，也就是 CD 中的 delivery。我们将使用项目中的 yaml 文件，对应用进行部署。
+
+前面提到，应用会部署到当前的集群中。部署成功后，我们可以通过访问 `http://[node-ip]:30080/hi` 来进行验证。
+
 ```yaml
 spec:
   params:
@@ -277,6 +304,10 @@ spec:
 ```
 
 #### 0x06 组装流水线
+
+在前面我们已经完成了流水线的各个 `step` 和 `task`，接下来就是将所有的 task 组装成真正的流水线 `Pipeline`。
+
+在 `Pipeline` 中，我们设定流水线各个 `step` 所需的入参，并按照顺序将 `task` “摆放”。默认情况下这些 `task` 会同时执行，我们通过 `runAfter` 字段对执行顺序进行编排。
 
 ```yaml
 apiVersion: tekton.dev/v1beta1
@@ -319,7 +350,6 @@ spec:
           value: "$(params.imageUrl)"
         - name: imageTag
           value: "$(params.imageTag)"
-
       workspaces:
         - name: source
           workspace: git-source
@@ -339,3 +369,76 @@ spec:
       runAfter:
         - source-to-image
 ```
+
+#### 0x07 执行流水线
+
+前面我们已经完成了流水线的定义，在执行的时候，需要通过定义 `PipelineRun` 来为其指定入参。比如这里的 `git-revision`、`git-url`、`imageUrl`、`imageTag`。
+
+拉取代码和编译两个 `task` 的运行是在不同的 Pod 中完成的，因此需要出持久化的存储来进行数据（代码仓库）的共享。
+
+```yaml
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: generic-pr-
+  name: generic-pipeline-run
+spec:
+  pipelineRef:
+    name: build-pipeline
+  params:
+    - name: git-revision
+      value: main
+    - name: git-url
+      value: https://github.com/addozhang/tekton-demo.git  
+    - name: imageUrl
+      value: addozhang/tekton-test
+    - name: imageTag
+      value: latest
+  workspaces:
+    - name: git-source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-config
+      secret:
+        secretName: docker-config
+  serviceAccountName: tekton-build
+```
+
+###  测试
+
+执行下面的命令创建 `PipelineRun` 资源启动流水线。
+
+```yaml
+kubectl apply -f run/run.yaml
+```
+
+在执行的过程中，你会看到下面几个 Pod 被创建：
+
+* generic-pipeline-run-deploy-to-k8s-xxx
+* generic-pipeline-run-fetch-from-git-xxx
+* generic-pipeline-run-source-to-image-xxx
+
+同时还有我们应用的 Pod `tekton-test-xxx`。
+
+尝试发送请求到 `http://[node-ip]:30080/hi`，查看返回结果。
+
+## 总结
+
+Tekton 是个很有意思的项目，其生态也在一步步的壮大，与此同时业界也不断涌现出各种周边的工具。由于时间原因，无法一一介绍。有兴趣的同学，可以看下我之前写过的文档。后续有时间，也希望能在这里继续给大家分享。
+
+* [CICD 的供应链安全工具 Tekton Chains](https://atbug.com/tekton-chains-secure-supply-chain/)
+* [Jenkins 如何与 Kubernetes 集群的 Tekton Pipeline 交互？](https://atbug.com/jenkins-interact-with-tekton-pipelines-via-plugin/)
+* [云原生CICD: Tekton Trigger 实战](https://atbug.com/tekton-trigger-practice/)
+
+CI/CD 平台是一件有挑战且充满乐趣的事情，在这个过程中我们会将现实世界中的工作流程以软件的方式实现出来。
+
+![CI:CD流程](media/CI:CD%E6%B5%81%E7%A8%8B.png)
+
+各家企业有自己独特的组织架构、管理制度，以及研发流程，即使是发展的不同阶段对平台也会有不同的需求。
+
+平台的实现可以简单，也可以很复杂。
