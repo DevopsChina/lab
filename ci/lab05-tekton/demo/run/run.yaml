@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: generic-pr-
+  name: generic-pipeline-run
+spec:
+  pipelineRef:
+    name: build-pipeline
+  params:
+    - name: git-revision
+      value: main
+    - name: git-url
+      value: https://github.com/addozhang/tekton-demo.git  
+    - name: imageUrl
+      value: addozhang/tekton-test
+    - name: imageTag
+      value: latest
+  workspaces:
+    - name: git-source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    - name: docker-config
+      secret:
+        secretName: docker-config
+  serviceAccountName: tekton-build

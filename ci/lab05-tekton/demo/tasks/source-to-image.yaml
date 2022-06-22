@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: source-to-image
+spec:
+  params:
+    - name: pathToDockerFile
+      description: The path to the dockerfile to build (relative to the context)
+      default: Dockerfile
+    - name: imageUrl
+      description: Url of image repository
+    - name: imageTag
+      description: Tag to apply to the built image
+      default: latest
+    - name: IMAGE
+      description: Name (reference) of the image to build.      
+    - name: CHAINS-GIT_COMMIT
+      description: Commit value
+    - name: CHAINS-GIT_URL
+      description: Git repo URL     
+  workspaces:
+    - name: source
+    - name: dockerconfig
+      mountPath: /kaniko/.docker
+  results:
+    - name: IMAGE_DIGEST
+      description: Digest of the image just built.
+    - name: IMAGE_URL
+      description: URL of the image just built.
+  steps:
+    - name: maven
+      image: maven:3.5-jdk-8-alpine
+      imagePullPolicy: IfNotPresent
+      workingDir: $(workspaces.source.path)
+      command:
+        - mvn
+      args:
+        - clean
+        - install
+        - -DskipTests
+      volumeMounts:
+        - name: m2
+          mountPath: /root/.m2
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v1.6.0-debug
+      imagePullPolicy: IfNotPresent
+      command:
+        - /kaniko/executor
+      args:
+        - --dockerfile=$(params.pathToDockerFile)
+        - --destination=$(params.imageUrl):$(params.imageTag)
+        - --context=$(workspaces.source.path)
+        - --digest-file=$(results.IMAGE_DIGEST.path)
+    - name: write-url
+      image: bash
+      script: |
+        set -e
+        echo $(params.IMAGE) | tee $(results.IMAGE_URL.path)        
+  volumes:
+    - name: m2
+      hostPath:
+        path: /data/.m2
