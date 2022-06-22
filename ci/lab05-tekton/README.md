@@ -7,7 +7,7 @@ tektōn 在古希腊语中有工匠、手艺人的意思，比如木匠、石匠
 
 ## Tekton 介绍
 
-Tekton 是 Google 开源的 Kubernetes 原生 CI/CD 系统，功能强大扩展性强。前身是 Knavite 里的 build-pipeline 项目，后期孵化成独立的项目。并成为 CDF 下的四大初始项目之一，其他三个是 Jenkins, Jenkins X, Spinnaker。
+Tekton 是 Google 开源的 Kubernetes 原生 CI/CD 系统，功能强大扩展性强。前身是 Knative 里的 build-pipeline 项目，后期孵化成独立的项目。并成为 CDF 下的四大初始项目之一，其他三个是 Jenkins, Jenkins X, Spinnaker。
 
 ### 优势
 
@@ -19,11 +19,12 @@ Tekton 是 Google 开源的 Kubernetes 原生 CI/CD 系统，功能强大扩展�
 
 ### 概念
 
-* Step
-* Task
-* Pipeline
-* TaskRun
-* PipelineRun
+* `Step`：CI/CD 工作流中的一个操作，比如编译 Java 程序、运行单元测试等等。
+* `Task`：有序 Step 的集合。Tekton 在 Kubernetes 的 Pod 中运行 `Task`，每个 `Step` 则对应 Pod 中的容器。如何 Pod 中的容器可以共享环境一样，`Task` 中的 `Step` 也可以彼此间共享数据。比如在 Pod 中挂在一个卷，各个容器都可以访问卷中的内容。
+* `Pipeline`：一些列有序 `Task` 的集合。Tekton 将 `Task` 组合成有序无环图（DAG），并按顺序执行。体现在 Kubernetes 中，Tekton 会按顺序依次创建 Pod 来执行 `Task`，并最终完成整个流水线的执行。
+* `PipelineRun`：Pipeline 承载流水线的定义，实际每次运行时都需要创建一个 `PipelineRun` 资源，指定要执行的流水线及其所需的入参。
+* `TaskRun`：是 `Task` 的执行。
+
 
 ![](media/16553864459332.png)
 
@@ -42,7 +43,7 @@ Tekton 是 Google 开源的 Kubernetes 原生 CI/CD 系统，功能强大扩展�
 
 ## 工作原理
 
-从 PipelineRun 到 TaskRun 再到 Pod 和容器。
+从 `PipelineRun` 到 `TaskRun` 再到 Pod 和容器。
 
 ![tekton-concept](media/tekton-concept.jpg)
 
@@ -62,6 +63,7 @@ Tekton 包含了多个组件：
 * [Tekton Catalog](https://github.com/tektoncd/catalog/blob/v1beta1/README.md)
 * [Tekton Hub](https://github.com/tektoncd/hub/blob/main/README.md)
 * [Tekton Operator](https://github.com/tektoncd/operator/blob/main/README.md)
+* [Tekton Results](https://github.com/tektoncd/results)
 
 ## 演示
 
@@ -123,6 +125,12 @@ tekton-pipelines-controller-5cfb9b8cfc-q4crs   1/1     Running   0          24s
 tekton-pipelines-webhook-6c9d4d5798-7xg8n      1/1     Running   0          24s
 ```
 
+### 安装 Tekton CLI
+
+```shell
+brew install tektoncd-cli
+```
+
 ### 安装 Tekton Dashboard
 
 通过 Dashboard 我们可以实时查看 `PipelineRun` 和 `TaskRun` 的状态，以及运行的日志；还可以查看定义的各种 CR。
@@ -130,6 +138,14 @@ tekton-pipelines-webhook-6c9d4d5798-7xg8n      1/1     Running   0          24s
 ```shell
 kubectl apply --filename \
 https://storage.googleapis.com/tekton-releases/dashboard/latest/tekton-dashboard-release.yaml
+```
+
+创建 NodePort service 以便从集群外进行访问。
+
+```shell
+kubectl expose deploy tekton-dashboard --name tekton-dashboard-node --port 9097 --target-port 9097 --type NodePort -n tekton-pipelines
+
+kubectl get svc tekton-dashboard-node -o jsonpath="{.spec.ports[0].nodePort}" -n tekton-pipelines
 ```
 
 ### Hello, Tekton
@@ -177,6 +193,8 @@ EOF
 3. 构建镜像并推送
 4. 部署
 
+*注意：所有的操作都是在 `tekton-pipelines` namespace 下操作*
+
 #### 0x01 RBAC
 
 用于 PipelineRun 运行的 service account。
@@ -187,6 +205,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: tekton-build
+  namespace: tekton-pipelines
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -196,7 +215,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: admin # user cluster role admin
+  name: admin # use cluster role admin
 subjects:
 - kind: ServiceAccount
   name: tekton-build
@@ -247,7 +266,7 @@ spec:
 kaniko 需要将 docker config 的文件存在于 /kanika/.docker 目录下。这里的思路是将 docker 的 config.json，以 secret 的方式持久化，在通过先添加 docker-registry类型的 secret，然后通过 workspace 的方式输入到 kaniko 运行环境中。
 
 ```shell
-kubectl create secret docker-registry dockerhub --docker-server=https://index.docker.io/v1/ --docker-username=[USERNAME] --docker-password=[PASSWORD] --dry-run=client -o json | jq -r '.data.".dockerconfigjson"' | base64 -d > /tmp/config.json && kubectl create secret generic docker-config --from-file=/tmp/config.json && rm -f /tmp/config.json
+kubectl create secret docker-registry dockerhub --docker-server=https://index.docker.io/v1/ --docker-username=$DOCKER_USERNAME --docker-password=$DOCKER_PASSWORD --dry-run=client -o json | jq -r '.data.".dockerconfigjson"' | base64 -d > /tmp/config.json && kubectl create secret generic docker-config --from-file=/tmp/config.json && rm -f /tmp/config.json
 ```
 
 构建镜像需要指定资源，比如 Dockerfile 的路径、镜像 URL、tag 等，通过 `params` 输入。
