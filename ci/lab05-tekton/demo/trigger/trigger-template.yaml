@@ -1,0 +1,44 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: trigger-test-triggertemplate
+  namespace: tekton-pipelines
+spec:
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: master
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: namespace
+      description: The namespace to create the resources
+      default: tekton-pielines
+    - name: projectname
+      description: The project name
+    - name: imagetag
+      description: The image tag
+      default: latest
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1alpha1
+      kind: PipelineRun
+      metadata:
+        name: tekton-test-pipeline-run-$(uid)
+        namespace: $(params.namespace)
+      spec:
+        serviceAccountName: tekton-test
+        params: 
+          - name: imageUrl
+            value: addozhang/$(params.projectname)
+          - name: imageTag
+            value: $(params.imagetag)
+        pipelineRef:
+          name: build-pipeline
+        resources:
+          - name: git-source
+            resourceSpec:
+              type: git
+              params:
+                - name: revision
+                  value: $(params.gitrevision)
+                - name: url
+                  value: $(params.gitrepositoryurl)

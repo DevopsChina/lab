@@ -1,0 +1,63 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-pipeline
+spec:
+  params:
+    - name: git-url
+    - name: git-revision
+    - name: pathToContext
+      description: The path to the build context, used by Kaniko - within the workspace
+      default: .
+    - name: imageUrl
+      description: Url of image repository
+    - name: imageTag
+      description: Tag to apply to the built image
+  workspaces:
+    - name: git-source
+    - name: docker-config
+  tasks:
+    - name: fetch-from-git
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: "$(params.git-url)"
+        - name: revision
+          value: "$(params.git-revision)"
+      workspaces:
+        - name: output
+          workspace: git-source
+    - name: source-to-image
+      taskRef:
+        name: source-to-image
+      params:
+        - name: imageUrl
+          value: "$(params.imageUrl)"
+        - name: IMAGE  
+          value: "$(params.imageUrl)"
+        - name: imageTag
+          value: "$(params.imageTag)"
+        - name: CHAINS-GIT_COMMIT
+          value: "$(tasks.fetch-from-git.results.commit)"
+        - name: CHAINS-GIT_URL
+          value: "$(tasks.fetch-from-git.results.url)"
+
+      workspaces:
+        - name: source
+          workspace: git-source
+        - name: dockerconfig
+          workspace: docker-config
+      runAfter:
+        - fetch-from-git
+    - name: deploy-to-k8s
+      taskRef: 
+        name: deploy-to-k8s
+      params:
+        - name: pathToYamlFile
+          value: deployment.yaml
+      workspaces:
+        - name: source
+          workspace: git-source
+      runAfter:
+        - source-to-image

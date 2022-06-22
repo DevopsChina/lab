@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: trigger-test-eventlistener
+  namespace: tekton-pipelines
+spec:
+  serviceAccountName: tekton-test
+  triggers:
+    - bindings:
+        - name: trigger-test-triggerbinding
+      template:
+        name: trigger-test-triggertemplate
