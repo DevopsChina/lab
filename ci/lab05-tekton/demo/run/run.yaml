@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: generic-pr-
+  # generateName: generic-pr-
   name: generic-pipeline-run
 spec:
   pipelineRef:
