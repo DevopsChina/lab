@@ -461,3 +461,39 @@ CI/CD 平台是一件有挑战且充满乐趣的事情，在这个过程中我�
 各家企业有自己独特的组织架构、管理制度，以及研发流程，即使是发展的不同阶段对平台也会有不同的需求。
 
 平台的实现可以简单，也可以很复杂。
+
+## FAQ
+
+以下问题是直播时社区爱好者的提问，问题中有些工具/产品我过往没有使用或者了解，回答也是基于网络和产品官网的内容。如有问题和不足，欢迎指出。欢迎根据我们的回答继续深入讨论。
+
+### 无情的工作机器啊：Tekton目前适合什么样的系统使用？
+
+Tekton 是个云原生的 CI/CD 框架，运行于 Kubernetes 环境。Tekton 是一个用于构建 CI/CD平台的框架，与其说什么样的系统适合 Tekton，不如说我们对 CI/CD 的平台有什么要求？Tekton 给我们带来的是扩展性、重用性、标准化、伸缩性等方面的优势。如果当面面临的是来自这些方面的问题，我认为 Tekton 是个不错的选择。
+
+
+### bili_88058603179 : 与Jenkins动态slaver优势在哪？
+
+Tekton 的创建我觉得在两个方面流水线定义和基础设施资源的使用。在资源使用方面，Tekton 与 Jenkins 动态 slaver  大同小异，都是借助 Kubernetes 的弹性、自动化以及容器来实现动态和隔离。
+
+- Tekton 通过对流水线的定义，将可重用和标准化的功能粒度变得更小。比如一个流水线拆分成多个可重用 Task 来执行，在同一时间只有一个 Task（非并行）的 Pod 在运行，资源利用方面更精细。
+- Jenkins 动态 slaver 的优势在于不改变原有实现（Jenkins）的基础上（成本更低），让原有 CI/CD 平台的资源利用更加高效。
+
+二者各有优势。
+
+### barbaz : tekton和drone有什么区别？
+
+我之前没有了解过 Drone，简单看了下。Drone 的实现与 Tekton 的原理都差不多，都是通过一个 runner/controller 来创建 Pod 来执行 Pipeline。
+
+从概念上来看，Drone 的最小组件称为 `Step`，对应的是 Pod 中的 Container。再上一层是 `Pipeline`，对应 Pod。每个 `Pipeline` 都是运行在同一个 Pod 中。组件的重用是通过镜像来实现的。
+
+Tekton 的最小组件也是 `Step`，再上一层是 `Task`（对应 Kubernetes 中的 Pod）。每个 `Pipeline` 可以由一个或多个 `Task` 组件，也就是说运行时会由一个或者多个 Pod 来完成流水线的执行。重用可以通过 `Step` 使用的镜像，或者 `Task` 来实现功能的重用。
+
+还有就是 Tekton 是开源的框架，而 Drone 的 runner 需要 [Drone Enterprice 许可](https://docs.drone.io/enterprise/#what-is-the-difference-between-open-source-and-enterprise)。
+
+![Drone Enterprise 许可](media/2022-06-26%20at%2017.39.31.png)
+
+### 没钱买鱼：有没有缓存加速编译的策略？
+
+不知道我对“缓存加速编译”的理解是否正确，如不准确请指正。
+
+就拿 Java 项目的编译来说，需要用到的缓存加速应该是各种依赖包。在演示中，我们使用了持久化存储来保存初次编译时下载的依赖包。流水线执行的过程中，这个持久化存储都会通过卷的方式挂在到 Pod 中，不会重新下载依赖包。其他语言也是类似。
