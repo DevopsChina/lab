@@ -1,4 +1,4 @@
-![](C:\Users\tsj\lab\iac\images\tf.JPG)
+![](./images/tf.JPG)
 
 ## 1. Terraform 简介
 
@@ -97,7 +97,7 @@ terraform支持几种传递参数的方式，第一大类，自动传参。第�
 
 手动传参： `-var="instance_type=t2.large"`, `export TF_VAR_image_id=ami-abc123` , 最后在都没有找到的情况下，在交互界面上要求给出变量值
 
-![](C:\Users\tsj\lab\iac\images\var.JPG)
+![](./images/var.JPG)
 
 ### 2.5 locals
 
@@ -213,17 +213,17 @@ Terraform官方提供了非常详尽的使用[guide](https://learn.hashicorp.com
 
 2. 新建一个 Org
 
-   <img src="C:\Users\tsj\lab\iac\images\neworg.jpg" alt="neworg" style="zoom:50%;" />
+   <img src="./images/neworg.jpg" alt="neworg" style="zoom:50%;" />
 
 3. 新建一个workspace，并且关联到GitHub repo
 
 4. 设置AK/SK两个环境变量
 
-   <img src="C:\Users\tsj\lab\iac\images\vars.jpg" alt="vars" style="zoom:33%;" />
+   <img src="./images/vars.jpg" alt="vars" style="zoom:33%;" />
 
 5. 执行Plan/Apply
 
-   <img src="C:\Users\tsj\lab\iac\images\plan.jpg" alt="plan" style="zoom:60%;" />
+   <img src="./images/plan.jpg" alt="plan" style="zoom:60%;" />
 
 ## 5. Terraform Module
 
