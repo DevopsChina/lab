@@ -38,13 +38,13 @@
 
 ### 持续集成 - ci        
 
-* 【第一季：第 3 集 恐龙级CI/CD工具 Jenkins [【B 站视频】](https://www.bilibili.com/video/BV1MA4y1Z7Fk)
+* 第一季：第 3 集 恐龙级CI/CD工具 Jenkins [【B 站视频】](https://www.bilibili.com/video/BV1MA4y1Z7Fk)
 * 第一季：第 5 集 云原生 CI 中的强者 Tekton [【B 站视频】](https://www.bilibili.com/video/BV1e94y117tY)
 * 第一季：第 6 集 云开发者可快速上手的 TeamCity [【B 站视频】](https://www.bilibili.com/video/BV1pY4y17754)
 
 ### 配置管理
 
-* 【第一季】第1集 ：配置管理神器 Ansible - 新手入门指南 [【Codelab】](config/lab01-ansible/readme.md) - [【B 站视频】](https://www.bilibili.com/video/BV1Uv4y1K7u9)
+* 第一季： 第1集 配置管理神器 Ansible - 新手入门指南 [【Codelab】](config/lab01-ansible/readme.md) - [【B 站视频】](https://www.bilibili.com/video/BV1Uv4y1K7u9)
 
 
 
@@ -59,7 +59,7 @@
 
 ### 平台 - platform
 
-* 【第一季：第 2 集 - 全能级 DevOps 平台 GitLab [【B 站视频】](https://www.bilibili.com/video/BV1hR4y1c75b)
+* 第一季：第 2 集 - 全能级 DevOps 平台 GitLab [【B 站视频】](https://www.bilibili.com/video/BV1hR4y1c75b)
 
 
 
