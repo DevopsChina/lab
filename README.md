@@ -2,9 +2,9 @@
 
 >Must know DevOps Tools for Developer [行动代号 *MKT4D*]
 
-获取对DevOps理念和技术的深刻理解，可以通过实操示例项目的方式。我们这个项目，用 DevOps 工具考古鉴宝的直播方式，请各路实战大拿给社区贡献了一些列有趣有料的Codelab，并用直播的方式进行生动的讲解。
+大家想要获取DevOps的理念和技术，收获深刻的理解；社区建议的途径是示例项目实操。这里是直播节目的代码仓库。我们用 DevOps 工具鉴宝的直播方式，请各路实战经验丰富的工程师给社区分享一些列有趣有料的Codelab，并在直播过程中进行生动的讲解和互动问答。
 
-"DevOps鉴宝活动“的目标是：面向社区公开的向所有人收集并分享DevOps工具链上各种工具的实操技能。
+"DevOps鉴宝活动“的目标是：公开面向社区的所有人，征集DevOps工具链中各种工具的实战操作技能。
 
 相关的 DevOps 工具应该包含，但不仅限于以下分类。
 
@@ -22,7 +22,7 @@
 
 ## 学习清单
 
-以下是所有社区 DevOps 鉴宝活动鉴宝人们分享的codelab 操练直播内容，请大家根据需求学习打卡。社区也欢迎你提交学习过程的延伸学习视频，分享你对某个DevOps 工具某部分知识的解读。
+以下是所有 DevOps 鉴宝活动直播内容的回放清单，请大家根据需求学习打卡。社区也欢迎你在视频中发表弹幕和留言，分享你对 DevOps 工具的见解。
 
 ### code
 
@@ -36,16 +36,21 @@
 ### verify
 
 
-### ci        
+### 持续集成 - ci        
 
+* 【第一季：第 3 集 恐龙级CI/CD工具 Jenkins [【B 站视频】](https://www.bilibili.com/video/BV1MA4y1Z7Fk)
+* 第一季：第 5 集 云原生 CI 中的强者 Tekton [【B 站视频】](https://www.bilibili.com/video/BV1e94y117tY)
+* 第一季：第 6 集 云开发者可快速上手的 TeamCity [【B 站视频】](https://www.bilibili.com/video/BV1pY4y17754)
 
 ### 配置管理
 
 * 【第一季】第1集 ：配置管理神器 Ansible - 新手入门指南 [【Codelab】](config/lab01-ansible/readme.md) - [【B 站视频】](https://www.bilibili.com/video/BV1Uv4y1K7u9)
 
 
-### deploy    
 
+### 部署 - deploy    
+
+* 第一季：第 4 集 GitOps 的不二之选 ArgoCD [【B 站视频】](https://www.bilibili.com/video/BV11a411L7f5)
 
 ### release   
 
@@ -54,7 +59,7 @@
 
 ### 平台 - platform
 
-* 【第一季】第2集 ： 平台级套件 极狐 GitLab - 新手入门指南 [【Codelab】]() - [【B 站视频】]()
+* 【第一季：第 2 集 - 全能级 DevOps 平台 GitLab [【B 站视频】](https://www.bilibili.com/video/BV1hR4y1c75b)
 
 
 
@@ -125,8 +130,28 @@
 
 第四期：
 
+* 阿里云云起实验室 & Elastc 赞助了直播抽奖礼品
+* JetBrains 赞助鉴宝人礼品
 
 第五期：
+
+* 阿里云云起实验室 & Elastc 赞助了直播抽奖礼品
+* JetBrains 赞助鉴宝人礼品
+
+
+第六期：
+
+* 阿里云云起实验室 & Elastc 赞助了直播抽奖礼品
+
+第七期：
+
+* 阿里云云起实验室 & Elastc 赞助了直播抽奖礼品
+
+第八期：
+
+第九期：
+
+第十期：
 
 ## 行为准则
 
