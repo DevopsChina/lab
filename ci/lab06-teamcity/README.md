@@ -12,7 +12,7 @@
 
 * 由 JetBrains 推出的团队工具，协助团队做构建管理、持续集成及持续部署的工作。
 * 第一版发布于 2006 年，积累 JetBrains 内部超过 15 年构建及部署经验的产品。
-* TeamCity 可说是 JetBrains [Dogfooding](https://www.bilibili.com/video/BV1TQ4y1K78p) 的代表，在早期没有 CI/CD 解决方案时，由团队自建而生的产品。
+* TeamCity 可说是 JetBrains [Dogfooding](https://www.bilibili.com/video/BV1Dg411f7iX) 的代表，在早期没有 CI/CD 解决方案时，由团队自建而生的产品。
 
 ## 为什么选择 TeamCity？
 
